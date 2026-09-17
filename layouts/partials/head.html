@@ -3,6 +3,7 @@
 <meta name="description" content="{{ .Description | default site.Params.description }}">
 <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
 <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<link rel="icon" href="{{ "feed-icon.png" | relURL }}" type="image/png">
 <link rel="alternate" href="{{ "feed.json" | absURL }}" type="application/feed+json" title="NetNewsWire Themes">
 {{ with resources.Get "css/site.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ .RelPermalink }}">
