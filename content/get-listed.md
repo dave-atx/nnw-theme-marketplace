@@ -3,7 +3,7 @@ title: "Get your theme listed"
 description: "Publish a valid NetNewsWire theme release and the marketplace will discover it automatically."
 ---
 
-The marketplace primarily indexes community themes on GitHub automatically. There is no submission form. A listing is not an endorsement by NetNewsWire or this marketplace, and it does not mean that a theme has received a security review.
+The marketplace primarily indexes community themes on GitHub automatically. There is no submission form. A listing is not an endorsement by [NetNewsWire](https://netnewswire.com/) or this marketplace, and it does not mean that a theme has received a security review.
 
 ## Listing requirements
 

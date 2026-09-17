@@ -10,7 +10,7 @@
       <section class="hero">
         <p class="eyebrow">A community catalog</p>
         <h1>Make your feeds<br><em>feel like yours.</em></h1>
-        <p class="lede">Discover thoughtful, community-made themes for NetNewsWire. Install one in a click and get back to reading.</p>
+        <p class="lede">Discover thoughtful, community-made themes for <a href="https://netnewswire.com/">NetNewsWire</a>. Install one in a click and get back to reading.</p>
       </section>
 
       {{ $trending := first 3 (sort (where hugo.Data.themes.themes "downloads_last_7_days" "gt" 0) "downloads_last_7_days" "desc") }}
