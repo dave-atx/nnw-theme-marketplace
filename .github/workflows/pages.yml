@@ -1,0 +1,95 @@
+name: Build and deploy Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.1.0
+        with:
+          version: "0.12.15"
+          enable-cache: true
+
+      - name: Install Python
+        run: uv python install 3.14
+
+      - name: Install locked dependencies
+        run: uv sync --locked
+
+      - name: Check Python
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Test Python
+        run: uv run python -m unittest discover -s tests -v
+
+      - name: Set UTC cache date
+        if: github.event_name != 'pull_request'
+        id: utc-date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore download history
+        if: github.event_name != 'pull_request'
+        uses: actions/cache@v6
+        with:
+          path: .cache/download-history.json
+          key: nnw-download-history-${{ steps.utc-date.outputs.date }}
+          restore-keys: nnw-download-history-
+
+      - name: Refresh theme catalog
+        if: github.event_name != 'pull_request'
+        run: uv run build-catalog
+
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.166.0"
+          extended: true
+
+      - name: Build site
+        run: hugo --minify --panicOnWarning
+
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

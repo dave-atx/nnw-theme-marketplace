@@ -1,0 +1,20 @@
+baseURL = "https://dave-atx.github.io/nnw-theme-marketplace/"
+locale = "en-US"
+title = "NetNewsWire Themes"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap", "robotsTXT", "404"]
+
+[mediaTypes."application/feed+json"]
+suffixes = ["json"]
+
+[outputFormats.JSONFeed]
+mediaType = "application/feed+json"
+baseName = "feed"
+isPlainText = true
+notAlternative = false
+
+[outputs]
+home = ["HTML", "JSONFeed"]
+
+[params]
+description = "Community-made themes for NetNewsWire."
+feedContentModified = "2026-09-17T05:35:00Z"

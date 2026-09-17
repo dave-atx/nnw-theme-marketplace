@@ -1,0 +1,78 @@
+{
+  "collections": [
+    {
+      "name": "PaiJi theme collection",
+      "homepage": "https://paiji.github.io/NetNewsWire-themes-collection/",
+      "items": [
+        {
+          "source_repository": "joodaloop/NetNewsWire-themes",
+          "theme_identifier": "com.joodaloop.themes.manu",
+          "package": {"kind": "release_asset", "repository": "PaiJi/NetNewsWire-themes-collection", "tag": "1.0.0", "asset": "Manu.nnwtheme.zip"},
+          "display": {"description": "Inspired by Manuel's website, with a dignified serif, subtle shadows, and highlighted links.", "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/manu-light.png"}
+        },
+        {
+          "source_repository": "joodaloop/NetNewsWire-themes",
+          "theme_identifier": "com.joodaloop.themes.royal",
+          "package": {"kind": "release_asset", "repository": "PaiJi/NetNewsWire-themes-collection", "tag": "1.0.0", "asset": "Royal.nnwtheme.zip"},
+          "display": {"description": "System serif type, red underlines, and justified text.", "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/royal-light.png"}
+        },
+        {
+          "source_repository": "joodaloop/NetNewsWire-themes",
+          "theme_identifier": "com.joodaloop.themes.slab",
+          "package": {"kind": "release_asset", "repository": "PaiJi/NetNewsWire-themes-collection", "tag": "1.0.0", "asset": "Slab.nnwtheme.zip"},
+          "display": {"description": "Monochrome sections, Avenir, and thick outlines.", "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/slab-light.png"}
+        },
+        {
+          "source_repository": "joodaloop/NetNewsWire-themes",
+          "theme_identifier": "com.mynameisstuart.themes.system-ui",
+          "package": {"kind": "release_asset", "repository": "PaiJi/NetNewsWire-themes-collection", "tag": "1.0.0", "asset": "system-ui.nnwtheme.zip"},
+          "display": {"description": "A modern macOS feel with SF Pro, blue links, and crisp font weights.", "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/system-ui-lght.png"}
+        },
+        {
+          "source_repository": "jsit/serif-gazette",
+          "theme_identifier": "com.jaysitter.themes.serifgazette",
+          "package": {"kind": "release_asset", "repository": "PaiJi/NetNewsWire-themes-collection", "tag": "1.1.0", "asset": "serif-gazette.nnwtheme.zip"},
+          "display": {"name": "Serif Gazette", "description": "A newspaper-inspired serif theme for NetNewsWire.", "screenshot_url": "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/serif-gazette/mac-white.png"}
+        },
+        {
+          "source_repository": "mikerhodes/nnw-allmine",
+          "theme_identifier": "uk.co.dx13.nnwthemes.allmine",
+          "package": {"kind": "release_asset", "repository": "PaiJi/NetNewsWire-themes-collection", "tag": "1.2.0", "asset": "nnw-allmine-main.zip"},
+          "display": {"name": "All Mine", "description": "A personal take on the default theme with humanist fonts and a favorite code face.", "screenshot_url": "https://raw.githubusercontent.com/mikerhodes/nnw-allmine/main/images/screenshot.png"}
+        },
+        {
+          "source_repository": "lkhrs/nnw-minutes",
+          "package": {"kind": "tag_archive", "tag": "1"},
+          "display": {"description": "Seravek headings and Iowan Old Style body text, inspired by Simone Silvestroni's site.", "screenshot_url": "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/minutes/mac-white.png"}
+        },
+        {
+          "source_repository": "mischreiber/nnw-themes",
+          "theme_identifier": "me.mikeschreiber.nnwthemes.default-serif",
+          "package": {"kind": "release_asset", "tag": "v0.1", "asset": "Default-Serif.nnwtheme.zip"},
+          "display": {"description": "The default NetNewsWire theme with Apple's New York serif typeface.", "screenshot_url": "https://raw.githubusercontent.com/mischreiber/nnw-themes/refs/tags/v0.1/images/Default-Serif-light.png"}
+        }
+      ]
+    },
+    {
+      "name": "Stuart Breckenridge themes",
+      "homepage": "https://stuartbreckenridge.net/projects/netnewswire-themes/",
+      "items": [
+        {
+          "source_repository": "stuartbreckenridge/NNWMatrix",
+          "package": {"kind": "tag_archive", "tag": "v1.0.2"},
+          "display": {"description": "A theme inspired by The Matrix movies.", "screenshot_url": "https://stuartbreckenridge.net/_astro/Simulator-Screenshot---iPad-Pro-13-inch--M5----2026-02-23-at-21.04.01-1.DDXBul2b_Z2db6j3.webp"}
+        },
+        {
+          "source_repository": "stuartbreckenridge/NNWThemePADD",
+          "package": {"kind": "tag_archive", "tag": "v1.0.1"},
+          "display": {"description": "A Star Trek PADD-inspired theme for NetNewsWire.", "screenshot_url": "https://stuartbreckenridge.net/_astro/Dropped-Screenshot.RuXlAo9m_ZbUGJ5.webp"}
+        },
+        {
+          "source_repository": "stuartbreckenridge/NNWThemesFinancialBroadsheet",
+          "package": {"kind": "tag_archive", "tag": "1"},
+          "display": {"name": "Financial Broadsheet", "description": "A newspaper-style theme with a financial focus.", "screenshot_url": "https://stuartbreckenridge.net/_astro/FinBroadSheet-Dark.D5k0JN0e_QgDT9.webp"}
+        }
+      ]
+    }
+  ]
+}

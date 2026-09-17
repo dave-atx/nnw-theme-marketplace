@@ -1,0 +1,29 @@
+[project]
+name = "nnw-theme-marketplace"
+version = "0.1.0"
+description = "Indexer for the community NetNewsWire theme marketplace"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+build-catalog = "marketplace.catalog:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "marketplace"
+module-root = "src"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "SIM", "UP"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.7,<0.17",
+]

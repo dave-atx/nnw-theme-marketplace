@@ -1,0 +1,538 @@
+{
+  "generated_at": "2026-09-17T05:24:23.359645+00:00",
+  "download_tracking_since": "2026-09-17T05:24:23.359125+00:00",
+  "themes": [
+    {
+      "id": "uk.co.dx13.nnwthemes.allmine",
+      "name": "All Mine",
+      "creator_name": "Mike Rhodes",
+      "creator_url": "https://dx13.co.uk/",
+      "author_github_url": "https://github.com/mikerhodes",
+      "version": 1,
+      "repository": "mikerhodes/nnw-allmine",
+      "repository_url": "https://github.com/mikerhodes/nnw-allmine",
+      "description": "A personal take on the default theme with humanist fonts and a favorite code face.",
+      "stars": 7,
+      "release": "1.2.0",
+      "released_at": "2024-05-19T18:21:42Z",
+      "asset_name": "nnw-allmine-main.zip",
+      "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.2.0/nnw-allmine-main.zip",
+      "downloads": 479,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.2.0%2Fnnw-allmine-main.zip",
+      "screenshot_url": "https://raw.githubusercontent.com/mikerhodes/nnw-allmine/main/images/screenshot.png"
+    },
+    {
+      "id": "com.raisul.netnewswire.calm",
+      "name": "Calm",
+      "creator_name": "Raisul",
+      "creator_url": "https://raisul.xyz",
+      "author_github_url": "https://github.com/raisulchowdhury",
+      "version": 12,
+      "repository": "raisulchowdhury/calm-nnwtheme",
+      "repository_url": "https://github.com/raisulchowdhury/calm-nnwtheme",
+      "description": "Navigate long articles without distraction with an adaptive, scrubbable NetNewsWire reading map.",
+      "stars": 2,
+      "release": "v1.4.1",
+      "released_at": "2026-08-23T16:08:53Z",
+      "asset_name": "Calm.nnwtheme.zip",
+      "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.4.1/Calm.nnwtheme.zip",
+      "downloads": 59,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fraisulchowdhury%2Fcalm-nnwtheme%2Freleases%2Fdownload%2Fv1.4.1%2FCalm.nnwtheme.zip",
+      "screenshot_url": "https://raw.githubusercontent.com/raisulchowdhury/calm-nnwtheme/main/assets/social-preview.jpg"
+    },
+    {
+      "id": "com.ducmbui.themes.compakt",
+      "name": "Compakt",
+      "creator_name": "Duc",
+      "creator_url": "https://ducmbui.com",
+      "author_github_url": "https://github.com/bmndc",
+      "version": 1,
+      "repository": "bmndc/Compakt.nnwtheme",
+      "repository_url": "https://github.com/bmndc/Compakt.nnwtheme",
+      "description": "An information-dense yet professional theme for NetNewsWire.",
+      "stars": 0,
+      "release": "1.1",
+      "released_at": "2026-04-17T09:15:58Z",
+      "asset_name": "Compakt.nnwtheme.zip",
+      "asset_url": "https://github.com/bmndc/Compakt.nnwtheme/releases/download/1.1/Compakt.nnwtheme.zip",
+      "downloads": 22,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fbmndc%2FCompakt.nnwtheme%2Freleases%2Fdownload%2F1.1%2FCompakt.nnwtheme.zip",
+      "screenshot_url": "https://raw.githubusercontent.com/bmndc/Compakt.nnwtheme/main/screenshot.png"
+    },
+    {
+      "id": "me.mikeschreiber.nnwthemes.default-serif",
+      "name": "Default Serif",
+      "creator_name": "Mike Schreiber",
+      "creator_url": "https://mikeschreiber.me/",
+      "author_github_url": "https://github.com/mischreiber",
+      "version": 1,
+      "repository": "mischreiber/nnw-themes",
+      "repository_url": "https://github.com/mischreiber/nnw-themes",
+      "description": "The default NetNewsWire theme with Apple's New York serif typeface.",
+      "stars": 1,
+      "release": "v0.1",
+      "released_at": "2024-11-15T05:02:23Z",
+      "asset_name": "Default-Serif.nnwtheme.zip",
+      "asset_url": "https://github.com/mischreiber/nnw-themes/releases/download/v0.1/Default-Serif.nnwtheme.zip",
+      "downloads": 488,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fmischreiber%2Fnnw-themes%2Freleases%2Fdownload%2Fv0.1%2FDefault-Serif.nnwtheme.zip",
+      "screenshot_url": "https://raw.githubusercontent.com/mischreiber/nnw-themes/refs/tags/v0.1/images/Default-Serif-light.png"
+    },
+    {
+      "id": "com.52chinaweb.themes.elegant",
+      "name": "elegant",
+      "creator_name": "Chang Jun",
+      "creator_url": "https://52chinaweb.com/",
+      "author_github_url": "https://github.com/ChangJun2019",
+      "version": 1,
+      "repository": "ChangJun2019/elegant-nnw",
+      "repository_url": "https://github.com/ChangJun2019/elegant-nnw",
+      "description": "Theme for NetNewsWire RSS Reader",
+      "stars": 8,
+      "release": "v0.1.16",
+      "released_at": "2025-04-08T03:58:03Z",
+      "asset_name": "Elegant.nnwtheme.zip",
+      "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.16/Elegant.nnwtheme.zip",
+      "downloads": 993,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FChangJun2019%2Felegant-nnw%2Freleases%2Fdownload%2Fv0.1.16%2FElegant.nnwtheme.zip",
+      "screenshot_url": "https://raw.githubusercontent.com/ChangJun2019/elegant-nnw/main/screenshots/elegant-theme-light.png"
+    },
+    {
+      "id": "org.marquard.nnwtheme.ember",
+      "name": "Ember",
+      "creator_name": "Dave Marquard",
+      "creator_url": "https://ember.marquard.org",
+      "author_github_url": "https://github.com/dave-atx",
+      "version": 8,
+      "repository": "dave-atx/ember-nnw-theme",
+      "repository_url": "https://github.com/dave-atx/ember-nnw-theme",
+      "description": "Magazine-like theme for NetNewsWire.",
+      "stars": 3,
+      "release": "v2.1",
+      "released_at": "2026-09-10T22:32:34Z",
+      "asset_name": "Ember.nnwtheme.zip",
+      "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v2.1/Ember.nnwtheme.zip",
+      "downloads": 228,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fdave-atx%2Fember-nnw-theme%2Freleases%2Fdownload%2Fv2.1%2FEmber.nnwtheme.zip",
+      "screenshot_url": "https://raw.githubusercontent.com/dave-atx/ember-nnw-theme/main/docs/assets/ember-macos-light.webp"
+    },
+    {
+      "id": "net.stuartbreckenridge.themes.financial-broadsheet",
+      "name": "Financial Broadsheet",
+      "creator_name": "Stuart Breckenridge",
+      "creator_url": "https://stuartbreckenridge.net",
+      "author_github_url": "https://github.com/stuartbreckenridge",
+      "version": 1,
+      "repository": "stuartbreckenridge/NNWThemesFinancialBroadsheet",
+      "repository_url": "https://github.com/stuartbreckenridge/NNWThemesFinancialBroadsheet",
+      "description": "A newspaper-style theme with a financial focus.",
+      "stars": 0,
+      "release": "1",
+      "released_at": "2025-07-12T14:02:01Z",
+      "asset_name": "NNWThemesFinancialBroadsheet-1.zip",
+      "asset_url": "https://github.com/stuartbreckenridge/NNWThemesFinancialBroadsheet/archive/refs/tags/1.zip",
+      "downloads": null,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fstuartbreckenridge%2FNNWThemesFinancialBroadsheet%2Farchive%2Frefs%2Ftags%2F1.zip",
+      "screenshot_url": "https://stuartbreckenridge.net/_astro/FinBroadSheet-Dark.D5k0JN0e_QgDT9.webp"
+    },
+    {
+      "id": "com.github.frznv.NetNewsWire-Flexoki",
+      "name": "Flexoki",
+      "creator_name": "frznv",
+      "creator_url": "https://github.com/frznv",
+      "author_github_url": "https://github.com/frznv",
+      "version": 2,
+      "repository": "frznv/NetNewsWire-Flexoki",
+      "repository_url": "https://github.com/frznv/NetNewsWire-Flexoki",
+      "description": "Flexoki theme for RSS reader NetNewsWire.",
+      "stars": 4,
+      "release": "v1",
+      "released_at": "2025-04-26T14:21:20Z",
+      "asset_name": "Flexoki.nnwtheme.zip",
+      "asset_url": "https://github.com/frznv/NetNewsWire-Flexoki/releases/download/v1/Flexoki.nnwtheme.zip",
+      "downloads": 104,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Ffrznv%2FNetNewsWire-Flexoki%2Freleases%2Fdownload%2Fv1%2FFlexoki.nnwtheme.zip",
+      "screenshot_url": null
+    },
+    {
+      "id": "com.joodaloop.themes.manu",
+      "name": "Manu",
+      "creator_name": "Judah",
+      "creator_url": "https://joodaloop.com/",
+      "author_github_url": "https://github.com/joodaloop",
+      "version": 1,
+      "repository": "joodaloop/NetNewsWire-themes",
+      "repository_url": "https://github.com/joodaloop/NetNewsWire-themes",
+      "description": "Inspired by Manuel's website, with a dignified serif, subtle shadows, and highlighted links.",
+      "stars": 47,
+      "release": "1.0.0",
+      "released_at": "2024-05-19T13:18:35Z",
+      "asset_name": "Manu.nnwtheme.zip",
+      "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/Manu.nnwtheme.zip",
+      "downloads": 1077,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2FManu.nnwtheme.zip",
+      "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/manu-light.png"
+    },
+    {
+      "id": "net.stuartbreckenridge.matrix",
+      "name": "Matrix",
+      "creator_name": "Stuart Breckenridge",
+      "creator_url": "https://stuartbreckenridge.net",
+      "author_github_url": "https://github.com/stuartbreckenridge",
+      "version": 1,
+      "repository": "stuartbreckenridge/NNWMatrix",
+      "repository_url": "https://github.com/stuartbreckenridge/NNWMatrix",
+      "description": "A theme inspired by The Matrix movies.",
+      "stars": 3,
+      "release": "v1.0.2",
+      "released_at": "2026-02-23T12:54:24Z",
+      "asset_name": "NNWMatrix-v1.0.2.zip",
+      "asset_url": "https://github.com/stuartbreckenridge/NNWMatrix/archive/refs/tags/v1.0.2.zip",
+      "downloads": null,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fstuartbreckenridge%2FNNWMatrix%2Farchive%2Frefs%2Ftags%2Fv1.0.2.zip",
+      "screenshot_url": "https://stuartbreckenridge.net/_astro/Simulator-Screenshot---iPad-Pro-13-inch--M5----2026-02-23-at-21.04.01-1.DDXBul2b_Z2db6j3.webp"
+    },
+    {
+      "id": "com.tw93.themes.miaoyan",
+      "name": "MiaoYan",
+      "creator_name": "Tw93",
+      "creator_url": "https://tw93.fun/",
+      "author_github_url": "https://github.com/tw93",
+      "version": 1,
+      "repository": "tw93/MiaoYan-NetNewsWire-Theme",
+      "repository_url": "https://github.com/tw93/MiaoYan-NetNewsWire-Theme",
+      "description": "A clean and elegant NetNewsWire theme optimized for Chinese reading.",
+      "stars": 118,
+      "release": "V1.1.1",
+      "released_at": "2025-11-23T01:56:20Z",
+      "asset_name": "MiaoYan.nnwtheme.zip",
+      "asset_url": "https://github.com/tw93/MiaoYan-NetNewsWire-Theme/releases/download/V1.1.1/MiaoYan.nnwtheme.zip",
+      "downloads": 611,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Ftw93%2FMiaoYan-NetNewsWire-Theme%2Freleases%2Fdownload%2FV1.1.1%2FMiaoYan.nnwtheme.zip",
+      "screenshot_url": "https://cdn.tw93.fun/pic/DnMetl.png"
+    },
+    {
+      "id": "com.lkhrs.themes.minutes",
+      "name": "Minutes",
+      "creator_name": "Luke Harris",
+      "creator_url": "https://www.lkhrs.com/",
+      "author_github_url": "https://github.com/lkhrs",
+      "version": 1,
+      "repository": "lkhrs/nnw-minutes",
+      "repository_url": "https://github.com/lkhrs/nnw-minutes",
+      "description": "Seravek headings and Iowan Old Style body text, inspired by Simone Silvestroni's site.",
+      "stars": 1,
+      "release": "1",
+      "released_at": "2023-05-12T16:57:19Z",
+      "asset_name": "nnw-minutes-1.zip",
+      "asset_url": "https://github.com/lkhrs/nnw-minutes/archive/refs/tags/1.zip",
+      "downloads": null,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Flkhrs%2Fnnw-minutes%2Farchive%2Frefs%2Ftags%2F1.zip",
+      "screenshot_url": "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/minutes/mac-white.png"
+    },
+    {
+      "id": "net.stuartbreckenridge.padd",
+      "name": "PADD",
+      "creator_name": "Stuart Breckenridge",
+      "creator_url": "https://stuartbreckenridge.net",
+      "author_github_url": "https://github.com/stuartbreckenridge",
+      "version": 1,
+      "repository": "stuartbreckenridge/NNWThemePADD",
+      "repository_url": "https://github.com/stuartbreckenridge/NNWThemePADD",
+      "description": "A Star Trek PADD-inspired theme for NetNewsWire.",
+      "stars": 0,
+      "release": "v1.0.1",
+      "released_at": "2025-08-22T00:41:28Z",
+      "asset_name": "NNWThemePADD-v1.0.1.zip",
+      "asset_url": "https://github.com/stuartbreckenridge/NNWThemePADD/archive/refs/tags/v1.0.1.zip",
+      "downloads": null,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fstuartbreckenridge%2FNNWThemePADD%2Farchive%2Frefs%2Ftags%2Fv1.0.1.zip",
+      "screenshot_url": "https://stuartbreckenridge.net/_astro/Dropped-Screenshot.RuXlAo9m_ZbUGJ5.webp"
+    },
+    {
+      "id": "com.joodaloop.themes.royal",
+      "name": "Royal",
+      "creator_name": "Judah",
+      "creator_url": "https://joodaloop.com/",
+      "author_github_url": "https://github.com/joodaloop",
+      "version": 1,
+      "repository": "joodaloop/NetNewsWire-themes",
+      "repository_url": "https://github.com/joodaloop/NetNewsWire-themes",
+      "description": "System serif type, red underlines, and justified text.",
+      "stars": 47,
+      "release": "1.0.0",
+      "released_at": "2024-05-19T13:18:35Z",
+      "asset_name": "Royal.nnwtheme.zip",
+      "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/Royal.nnwtheme.zip",
+      "downloads": 724,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2FRoyal.nnwtheme.zip",
+      "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/royal-light.png"
+    },
+    {
+      "id": "com.jaysitter.themes.serifgazette",
+      "name": "Serif Gazette",
+      "creator_name": "Jay Sitter",
+      "creator_url": "https://www.jaysitter.com/",
+      "author_github_url": "https://github.com/jsit",
+      "version": 1,
+      "repository": "jsit/serif-gazette",
+      "repository_url": "https://github.com/jsit/serif-gazette",
+      "description": "A newspaper-inspired serif theme for NetNewsWire.",
+      "stars": 1,
+      "release": "1.1.0",
+      "released_at": "2024-05-19T15:21:34Z",
+      "asset_name": "serif-gazette.nnwtheme.zip",
+      "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.1.0/serif-gazette.nnwtheme.zip",
+      "downloads": 354,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.1.0%2Fserif-gazette.nnwtheme.zip",
+      "screenshot_url": "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/serif-gazette/mac-white.png"
+    },
+    {
+      "id": "com.joodaloop.themes.slab",
+      "name": "Slab",
+      "creator_name": "Judah",
+      "creator_url": "https://joodaloop.com/",
+      "author_github_url": "https://github.com/joodaloop",
+      "version": 1,
+      "repository": "joodaloop/NetNewsWire-themes",
+      "repository_url": "https://github.com/joodaloop/NetNewsWire-themes",
+      "description": "Monochrome sections, Avenir, and thick outlines.",
+      "stars": 47,
+      "release": "1.0.0",
+      "released_at": "2024-05-19T13:18:35Z",
+      "asset_name": "Slab.nnwtheme.zip",
+      "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/Slab.nnwtheme.zip",
+      "downloads": 609,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2FSlab.nnwtheme.zip",
+      "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/slab-light.png"
+    },
+    {
+      "id": "com.mynameisstuart.themes.system-ui",
+      "name": "system-ui",
+      "creator_name": "Judah",
+      "creator_url": "https://joodaloop.com/",
+      "author_github_url": "https://github.com/joodaloop",
+      "version": 1,
+      "repository": "joodaloop/NetNewsWire-themes",
+      "repository_url": "https://github.com/joodaloop/NetNewsWire-themes",
+      "description": "A modern macOS feel with SF Pro, blue links, and crisp font weights.",
+      "stars": 47,
+      "release": "1.0.0",
+      "released_at": "2024-05-19T13:18:35Z",
+      "asset_name": "system-ui.nnwtheme.zip",
+      "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/system-ui.nnwtheme.zip",
+      "downloads": 1633,
+      "downloads_last_7_days": null,
+      "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2Fsystem-ui.nnwtheme.zip",
+      "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/system-ui-lght.png"
+    }
+  ],
+  "diagnostics": [
+    {
+      "repository": "bmndc/Compakt.nnwtheme",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "brunoamaral/netnewswire-to-obsidian",
+      "themes": 0,
+      "errors": [
+        "latest release has no .nnwtheme.zip asset"
+      ]
+    },
+    {
+      "repository": "ChangJun2019/elegant-nnw",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "curly210102/NNWThemesSspai",
+      "themes": 0,
+      "errors": [
+        "sspai.nnwtheme.zip: no valid .nnwtheme package found"
+      ]
+    },
+    {
+      "repository": "dave-atx/ember-nnw-theme",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "extratone/thingsthemes",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "frznv/NetNewsWire-Flexoki",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "jonathanspiva/swift-netnewswire-mcp",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "jsit/folio-nnw-theme",
+      "themes": 0,
+      "errors": [
+        "latest release has no .nnwtheme.zip asset"
+      ]
+    },
+    {
+      "repository": "jsit/serif-gazette",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "lkhrs/nnw-minutes",
+      "themes": 0,
+      "errors": [
+        "latest release has no .nnwtheme.zip asset"
+      ]
+    },
+    {
+      "repository": "mcat/remarkable-netnewswire-extension",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "PaiJi/NetNewsWire-themes-collection",
+      "themes": 0,
+      "errors": [
+        "latest release has no .nnwtheme.zip asset"
+      ]
+    },
+    {
+      "repository": "raisulchowdhury/calm-nnwtheme",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "raztronaut/personal-rss",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "rexarski/netnewswire-themes",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "shannonkay/Themes-NetNewsWire",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "spkerber/netnewswire-feed-booster",
+      "themes": 0,
+      "errors": [
+        "latest release has no .nnwtheme.zip asset"
+      ]
+    },
+    {
+      "repository": "tw93/MiaoYan-NetNewsWire-Theme",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "VirInvictus/Viaduct",
+      "themes": 0,
+      "errors": [
+        "latest release has no .nnwtheme.zip asset"
+      ]
+    },
+    {
+      "repository": "Yeloby/norske-rss-feeder",
+      "themes": 0,
+      "errors": [
+        "no published release"
+      ]
+    },
+    {
+      "repository": "PaiJi theme collection: joodaloop/NetNewsWire-themes",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: joodaloop/NetNewsWire-themes",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: joodaloop/NetNewsWire-themes",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: joodaloop/NetNewsWire-themes",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: jsit/serif-gazette",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: mikerhodes/nnw-allmine",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: lkhrs/nnw-minutes",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "PaiJi theme collection: mischreiber/nnw-themes",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "Stuart Breckenridge themes: stuartbreckenridge/NNWMatrix",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "Stuart Breckenridge themes: stuartbreckenridge/NNWThemePADD",
+      "themes": 1,
+      "errors": []
+    },
+    {
+      "repository": "Stuart Breckenridge themes: stuartbreckenridge/NNWThemesFinancialBroadsheet",
+      "themes": 1,
+      "errors": []
+    }
+  ]
+}

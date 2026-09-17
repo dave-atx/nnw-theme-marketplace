@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {{ partial "head.html" . }}
+  </head>
+  <body>
+    {{ partial "header.html" . }}
+    <main class="install-page">
+      <p class="eyebrow">Install theme</p>
+      <h1 data-install-title>Preparing your theme…</h1>
+      <p data-install-status>Click or tap the button below to open this theme in NetNewsWire.</p>
+      <a class="install-button install-page-button" data-install-button hidden>Install in NetNewsWire</a>
+      <p class="install-caution">Theme packages are community-published and have not received a security review.</p>
+    </main>
+    {{ partial "footer.html" . }}
+    <script>
+      const themes = {
+        {{- range $index, $theme := hugo.Data.themes.themes }}{{ if $index }},{{ end }}
+        {{ $theme.id | jsonify | safeJS }}: { name: {{ $theme.name | jsonify | safeJS }}, url: {{ $theme.install_url | jsonify | safeJS }} }
+        {{- end }}
+      };
+      const theme = themes[new URLSearchParams(window.location.search).get("theme")];
+      const title = document.querySelector("[data-install-title]");
+      const status = document.querySelector("[data-install-status]");
+      const button = document.querySelector("[data-install-button]");
+      if (theme) {
+        title.textContent = `Install ${theme.name}`;
+        button.href = theme.url;
+        button.hidden = false;
+      } else {
+        title.textContent = "Theme not found";
+        status.textContent = "This install link is incomplete or no longer belongs to a listed theme.";
+      }
+    </script>
+  </body>
+</html>

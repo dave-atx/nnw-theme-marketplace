@@ -1,0 +1,55 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "NetNewsWire Themes",
+  "home_page_url": {{ site.Home.Permalink | jsonify }},
+  "feed_url": {{ "feed.json" | absURL | jsonify }},
+  "description": "New and updated community themes for NetNewsWire.",
+  "user_comment": "Subscribe to this feed in NetNewsWire, then open an entry to preview and install its theme.",
+  "language": "en-US",
+  "icon": {{ "feed-icon.png" | absURL | jsonify }},
+  "favicon": {{ "feed-icon.png" | absURL | jsonify }},
+  "items": [
+    {{- range $index, $theme := sort hugo.Data.themes.themes "released_at" "desc" }}
+      {{- if $index }},{{ end }}
+      {{- $description := $theme.description | htmlEscape }}
+      {{- $name := $theme.name | htmlEscape }}
+      {{- $installURL := printf "install/?theme=%s" ($theme.id | urlquery) | absURL | htmlEscape }}
+      {{- $repositoryURL := $theme.repository_url | htmlEscape }}
+      {{- $image := "" }}
+      {{- with $theme.screenshot_url }}
+        {{- $image = printf `<p><img src="%s" alt="Preview of %s"></p>` (. | htmlEscape) $name }}
+      {{- end }}
+      {{- $content := printf `%s<p>%s</p><p><a href="%s">Install %s in NetNewsWire</a> · <a href="%s">View on GitHub</a></p>` $image $description $installURL $name $repositoryURL }}
+      {
+        "id": {{ $theme.asset_url | jsonify }},
+        "url": {{ $theme.repository_url | jsonify }},
+        "external_url": {{ $theme.creator_url | jsonify }},
+        "title": {{ printf "%s %s" $theme.name $theme.release | jsonify }},
+        "summary": {{ $theme.description | jsonify }},
+        "content_html": {{ $content | jsonify }},
+        "date_published": {{ $theme.released_at | jsonify }},
+        "date_modified": {{ site.Params.feedContentModified | default $theme.released_at | jsonify }},
+        {{- with $theme.screenshot_url }}
+        "image": {{ . | jsonify }},
+        {{- end }}
+        "authors": [
+          {
+            "name": {{ $theme.creator_name | jsonify }},
+            "url": {{ $theme.author_github_url | jsonify }}
+          }
+        ],
+        "tags": ["NetNewsWire", "theme"],
+        "attachments": [
+          {
+            "url": {{ $theme.asset_url | jsonify }},
+            "mime_type": "application/zip",
+            "title": {{ $theme.asset_name | jsonify }}
+          }
+        ],
+        "_netnewswire": {
+          "install_url": {{ $installURL | jsonify }}
+        }
+      }
+    {{- end }}
+  ]
+}

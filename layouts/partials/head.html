@@ -1,0 +1,14 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="{{ .Description | default site.Params.description }}">
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<link rel="alternate" href="{{ "feed.json" | absURL }}" type="application/feed+json" title="NetNewsWire Themes">
+{{ with resources.Get "css/site.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}">
+{{ end }}
+{{ if .IsHome }}
+  {{ with resources.Get "js/site.js" | minify | fingerprint }}
+    <script src="{{ .RelPermalink }}" defer></script>
+  {{ end }}
+{{ end }}

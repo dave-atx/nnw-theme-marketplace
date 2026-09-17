@@ -1,0 +1,9 @@
+/.hugo_build.lock
+/.playwright-cli/
+/.ruff_cache/
+/.venv/
+/public/
+/.cache/
+/resources/_gen/
+__pycache__/
+.DS_Store

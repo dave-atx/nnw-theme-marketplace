@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {{ partial "head.html" . }}
+  </head>
+  <body>
+    {{ partial "header.html" . }}
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">A community catalog</p>
+        <h1>Make your feeds<br><em>feel like yours.</em></h1>
+        <p class="lede">Discover thoughtful, community-made themes for NetNewsWire. Install one in a click and get back to reading.</p>
+      </section>
+
+      <section class="catalog" aria-labelledby="catalog-heading">
+        <div class="catalog-heading">
+          <div>
+            <p class="eyebrow">The collection</p>
+            <h2 id="catalog-heading"><span data-visible-count>{{ len hugo.Data.themes.themes }}</span> themes</h2>
+          </div>
+          <div class="controls">
+            <label class="search">
+              <span class="sr-only">Search themes</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+              <input type="search" placeholder="Search themes" data-search>
+            </label>
+            <label class="sort">
+              <span class="sr-only">Sort themes</span>
+              <select data-sort>
+                <option value="popular">Most downloaded</option>
+                <option value="recent">Recently released</option>
+                <option value="name">Name</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <aside class="disclosure" aria-label="Marketplace disclosure">
+          <strong>Community listings are not endorsements.</strong>
+          Inclusion is not an endorsement by NetNewsWire or this marketplace, and no theme has been security-reviewed. Review the source and author before installing.
+        </aside>
+
+        {{ $trending := first 3 (sort (where hugo.Data.themes.themes "downloads_last_7_days" "gt" 0) "downloads_last_7_days" "desc") }}
+        <section class="trending" aria-labelledby="trending-heading">
+          <div class="trending-heading">
+            <div>
+              <p class="eyebrow">Moving this week</p>
+              <h2 id="trending-heading">Trending</h2>
+            </div>
+            <p>Based on new GitHub release downloads over the last seven days.</p>
+          </div>
+          {{ if $trending }}
+            <div class="trending-grid">
+              {{ range $trending }}
+                <a class="trend-card" href="#{{ .id | anchorize }}">
+                  {{ with .screenshot_url }}<img src="{{ . }}" alt="" loading="lazy">{{ end }}
+                  <span>
+                    <strong>{{ .name }}</strong>
+                    <small>+{{ lang.FormatNumber 0 .downloads_last_7_days }} downloads</small>
+                  </span>
+                  <b aria-hidden="true">↗</b>
+                </a>
+              {{ end }}
+            </div>
+          {{ else }}
+            <p class="trend-warming">Collecting the first seven days of download history. Trends will appear here once a full window is available.</p>
+          {{ end }}
+        </section>
+
+        <div class="theme-grid" data-theme-grid>
+          {{ range hugo.Data.themes.themes }}
+            <article id="{{ .id | anchorize }}" class="theme-card" data-theme data-name="{{ .name | lower }}" data-repository="{{ .repository | lower }}" data-downloads="{{ .downloads | default 0 }}" data-released="{{ time.AsTime .released_at | time.Format "20060102150405" }}">
+              <div class="theme-preview">
+                {{ if .screenshot_url }}
+                  <img src="{{ .screenshot_url }}" alt="Preview of {{ .name }}" loading="lazy">
+                {{ else }}
+                  <div class="preview-placeholder" aria-hidden="true">
+                    <div class="mock-window">
+                      <span></span><span></span><span></span>
+                      <div class="mock-kicker"></div>
+                      <div class="mock-title"></div>
+                      <div class="mock-copy"></div>
+                      <div class="mock-copy short"></div>
+                    </div>
+                  </div>
+                {{ end }}
+                <span class="version">{{ .release }}</span>
+              </div>
+              <div class="theme-body">
+                <div class="theme-title-row">
+                  <div>
+                    <h3>{{ .name }}</h3>
+                    <p>by <a href="{{ .author_github_url }}">{{ .creator_name }}</a></p>
+                  </div>
+                  <a class="install-button" href="{{ .install_url | safeURL }}">Install</a>
+                </div>
+                <p class="description">{{ .description }}</p>
+                <footer class="theme-meta">
+                  <span{{ if ne .downloads nil }} title="GitHub release asset downloads"{{ end }}>
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"></path></svg>
+                    {{ if ne .downloads nil }}{{ lang.FormatNumber 0 .downloads }} downloads{{ else }}Downloads unavailable{{ end }}
+                  </span>
+                  <span title="GitHub stars">
+                    <svg class="star-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"></path></svg>
+                    {{ lang.FormatNumber 0 .stars }}
+                  </span>
+                </footer>
+                <footer class="theme-links">
+                  <a href="{{ .repository_url }}">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.3-.4 6.8-1.6 6.8-7A5.4 5.4 0 0 0 19.4 4 5 5 0 0 0 19.3.5S18.2.1 15 1.8a13.4 13.4 0 0 0-7 0C4.8.1 3.7.5 3.7.5A5 5 0 0 0 3.6 4a5.4 5.4 0 0 0-1.4 3.7c0 5.4 3.5 6.6 6.8 7A4.8 4.8 0 0 0 8 18v4"></path></svg>
+                    GitHub
+                  </a>
+                  <a href="{{ .creator_url }}">
+                    Theme home <span aria-hidden="true">↗</span>
+                  </a>
+                </footer>
+                <p class="updated">Updated {{ time.Format "Jan 2, 2006" (time.AsTime .released_at) }}</p>
+              </div>
+            </article>
+          {{ end }}
+        </div>
+        <p class="empty-state" data-empty hidden>No themes match that search.</p>
+      </section>
+
+      <section class="about" id="about">
+        <p class="eyebrow">Open by design</p>
+        <h2>Made by readers,<br>shared on GitHub.</h2>
+        <p>This catalog indexes public repositories tagged for NetNewsWire, plus a small set of established collections, and validates every package. Listings are community-published and are not reviewed or endorsed by NetNewsWire.</p>
+        <div class="about-actions">
+          <a href="{{ "get-listed/" | relURL }}">Publish your theme <span aria-hidden="true">→</span></a>
+          <a href="{{ "feed.json" | relURL }}" type="application/feed+json">Subscribe to the JSON Feed <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+    </main>
+
+    {{ partial "footer.html" . }}
+  </body>
+</html>

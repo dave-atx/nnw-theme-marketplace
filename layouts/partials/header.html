@@ -1,0 +1,12 @@
+<header class="site-header">
+  <a class="brand" href="{{ "" | relURL }}" aria-label="NetNewsWire Themes home">
+    <span class="brand-mark" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </span>
+    <span>NetNewsWire Themes</span>
+  </a>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="{{ "" | relURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>Themes</a>
+    <a href="{{ "get-listed/" | relURL }}"{{ if eq .RelPermalink ("get-listed/" | relURL) }} aria-current="page"{{ end }}>Get listed</a>
+  </nav>
+</header>
