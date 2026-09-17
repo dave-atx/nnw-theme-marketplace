@@ -13,6 +13,31 @@
         <p class="lede">Discover thoughtful, community-made themes for NetNewsWire. Install one in a click and get back to reading.</p>
       </section>
 
+      {{ $trending := first 3 (sort (where hugo.Data.themes.themes "downloads_last_7_days" "gt" 0) "downloads_last_7_days" "desc") }}
+      {{ with $trending }}
+        <section class="trending" aria-labelledby="trending-heading">
+          <div class="trending-heading">
+            <div>
+              <p class="eyebrow">Moving this week</p>
+              <h2 id="trending-heading">Trending</h2>
+            </div>
+            <p>Based on new GitHub release downloads over the last seven days.</p>
+          </div>
+          <div class="trending-grid">
+            {{ range . }}
+              <a class="trend-card" href="#{{ .id | anchorize }}">
+                {{ with .screenshot_url }}<img src="{{ . }}" alt="" loading="lazy">{{ end }}
+                <span>
+                  <strong>{{ .name }}</strong>
+                  <small>+{{ lang.FormatNumber 0 .downloads_last_7_days }} downloads</small>
+                </span>
+                <b aria-hidden="true">↗</b>
+              </a>
+            {{ end }}
+          </div>
+        </section>
+      {{ end }}
+
       <section class="catalog" aria-labelledby="catalog-heading">
         <div class="catalog-heading">
           <div>
@@ -40,33 +65,6 @@
           <strong>Community listings are not endorsements.</strong>
           Inclusion is not an endorsement by NetNewsWire or this marketplace, and no theme has been security-reviewed. Review the source and author before installing.
         </aside>
-
-        {{ $trending := first 3 (sort (where hugo.Data.themes.themes "downloads_last_7_days" "gt" 0) "downloads_last_7_days" "desc") }}
-        <section class="trending" aria-labelledby="trending-heading">
-          <div class="trending-heading">
-            <div>
-              <p class="eyebrow">Moving this week</p>
-              <h2 id="trending-heading">Trending</h2>
-            </div>
-            <p>Based on new GitHub release downloads over the last seven days.</p>
-          </div>
-          {{ if $trending }}
-            <div class="trending-grid">
-              {{ range $trending }}
-                <a class="trend-card" href="#{{ .id | anchorize }}">
-                  {{ with .screenshot_url }}<img src="{{ . }}" alt="" loading="lazy">{{ end }}
-                  <span>
-                    <strong>{{ .name }}</strong>
-                    <small>+{{ lang.FormatNumber 0 .downloads_last_7_days }} downloads</small>
-                  </span>
-                  <b aria-hidden="true">↗</b>
-                </a>
-              {{ end }}
-            </div>
-          {{ else }}
-            <p class="trend-warming">Collecting the first seven days of download history. Trends will appear here once a full window is available.</p>
-          {{ end }}
-        </section>
 
         <div class="theme-grid" data-theme-grid>
           {{ range hugo.Data.themes.themes }}
