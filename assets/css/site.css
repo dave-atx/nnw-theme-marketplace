@@ -145,7 +145,6 @@ h1 em { color: var(--accent); font-weight: 400; }
 .trend-card strong { overflow: hidden; font: 400 19px/1.1 var(--serif); text-overflow: ellipsis; white-space: nowrap; }
 .trend-card small { color: var(--muted); font-size: 11px; }
 .trend-card b { color: var(--accent); font-size: 14px; }
-.trend-warming { margin: 0; padding: 18px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 13px; }
 .controls { display: flex; gap: 10px; }
 .search, .sort {
   display: flex;

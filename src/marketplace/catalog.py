@@ -10,9 +10,11 @@ import shutil
 import stat
 import subprocess
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import xml.parsers.expat
 import zipfile
 from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -31,10 +33,28 @@ REQUIRED_PLIST_FIELDS = {
 }
 MAX_ASSET_BYTES = 25 * 1024 * 1024
 MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
+RETRY_STATUSES = frozenset({500, 502, 503, 504})
+REQUEST_ATTEMPTS = 3
+RETRY_BACKOFF_SECONDS = 2.0
+MIN_CATALOG_RETENTION = 0.75
 
 
 class CatalogError(RuntimeError):
-    pass
+    """A recoverable problem with one repository, release, or archive.
+
+    Callers record these as diagnostics and continue with the next candidate.
+    """
+
+
+class CatalogNotFound(CatalogError):
+    """GitHub has no such repository, release, or tag."""
+
+
+class CatalogAborted(RuntimeError):
+    """A problem that invalidates the whole run, such as exhausted API quota.
+
+    Aborting keeps a partial catalog from being written over a complete one.
+    """
 
 
 @dataclass(frozen=True)
@@ -44,7 +64,6 @@ class Theme:
     creator_name: str
     creator_url: str
     author_github_url: str
-    version: int
     repository: str
     repository_url: str
     description: str
@@ -86,22 +105,56 @@ class GitHub:
             headers["Authorization"] = f"Bearer {self.token}"
         return urllib.request.Request(url, headers=headers)
 
+    @staticmethod
+    def _check_rate_limit(error: urllib.error.HTTPError, url: str) -> None:
+        """Abort the run when GitHub reports exhausted quota rather than a real 403."""
+        if error.code not in (403, 429):
+            return
+        headers = error.headers or {}
+        exhausted = headers.get("x-ratelimit-remaining") == "0"
+        throttled = headers.get("retry-after") is not None
+        if error.code == 403 and not exhausted and not throttled:
+            return
+        reset = headers.get("x-ratelimit-reset")
+        when = ""
+        if reset and reset.isdigit():
+            when = f" until {datetime.fromtimestamp(int(reset), UTC).isoformat()}"
+        raise CatalogAborted(f"GitHub API quota exhausted{when} (requesting {url})")
+
+    def _open(self, request: urllib.request.Request, timeout: int, limit: int | None) -> bytes:
+        url = request.full_url
+        for attempt in range(1, REQUEST_ATTEMPTS + 1):
+            try:
+                with urllib.request.urlopen(request, timeout=timeout) as response:
+                    return response.read() if limit is None else response.read(limit)
+            except urllib.error.HTTPError as error:
+                self._check_rate_limit(error, url)
+                if error.code == 404:
+                    raise CatalogNotFound(f"GitHub returned 404 for {url}") from error
+                retryable = error.code in RETRY_STATUSES
+                if not retryable or attempt == REQUEST_ATTEMPTS:
+                    raise CatalogError(f"GitHub returned {error.code} for {url}") from error
+                reason: object = error.code
+            except (urllib.error.URLError, TimeoutError) as error:
+                if attempt == REQUEST_ATTEMPTS:
+                    raise CatalogError(f"could not reach {url}: {error}") from error
+                reason = error
+            print(f"  retrying {url} after {reason} (attempt {attempt}/{REQUEST_ATTEMPTS})")
+            time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+        raise AssertionError("unreachable")
+
     def json(self, path: str) -> Any:
         url = path if path.startswith("https://") else f"{API_ROOT}{path}"
+        payload = self._open(self.request(url), timeout=30, limit=None)
         try:
-            with urllib.request.urlopen(self.request(url), timeout=30) as response:
-                return json.load(response)
-        except urllib.error.HTTPError as error:
-            raise CatalogError(f"GitHub returned {error.code} for {url}") from error
+            return json.loads(payload)
+        except ValueError as error:
+            raise CatalogError(f"GitHub returned invalid JSON for {url}") from error
 
     def bytes(self, url: str) -> bytes:
         request = self.request(url)
         request.headers["Accept"] = "application/octet-stream"
-        try:
-            with urllib.request.urlopen(request, timeout=60) as response:
-                content = response.read(MAX_ASSET_BYTES + 1)
-        except urllib.error.HTTPError as error:
-            raise CatalogError(f"Download returned {error.code} for {url}") from error
+        content = self._open(request, timeout=60, limit=MAX_ASSET_BYTES + 1)
         if len(content) > MAX_ASSET_BYTES:
             raise CatalogError("release asset exceeds the 25 MiB validation limit")
         return content
@@ -150,6 +203,31 @@ def _archive_path(root: PurePosixPath, filename: str) -> str:
     return filename if root == PurePosixPath(".") else str(root / filename)
 
 
+def _theme_metadata(raw: bytes, info_path: str) -> dict[str, Any]:
+    """Parse and validate one Info.plist.
+
+    Archives come from untrusted repositories, so any parser failure has to
+    surface as a CatalogError that callers can record and skip past. plistlib
+    raises ExpatError for malformed XML and returns whatever type the file
+    declares, neither of which is a CatalogError on its own.
+    """
+    try:
+        metadata = plistlib.loads(raw)
+    except plistlib.InvalidFileException:
+        raise
+    except (xml.parsers.expat.ExpatError, ValueError, TypeError, OverflowError) as error:
+        raise CatalogError(f"{info_path}: could not be parsed: {error}") from error
+    if not isinstance(metadata, dict):
+        raise CatalogError(f"{info_path}: top level must be a dictionary")
+    for field, field_type in REQUIRED_PLIST_FIELDS.items():
+        value = metadata.get(field)
+        if field_type is int and isinstance(value, bool):
+            raise CatalogError(f"{info_path}: {field} must be an integer")
+        if not isinstance(value, field_type) or (isinstance(value, str) and not value.strip()):
+            raise CatalogError(f"{info_path}: invalid {field}")
+    return metadata
+
+
 def themes_in_asset(content: bytes, asset_name: str) -> list[dict[str, Any]]:
     with tempfile.SpooledTemporaryFile(max_size=MAX_ASSET_BYTES) as file:
         file.write(content)
@@ -163,26 +241,25 @@ def themes_in_asset(content: bytes, asset_name: str) -> list[dict[str, Any]]:
                     if not all(path in archive_names for path in required_paths):
                         continue
                     info_path = _archive_path(root, "Info.plist")
-                    metadata = plistlib.loads(archive.read(info_path))
-                    for field, field_type in REQUIRED_PLIST_FIELDS.items():
-                        value = metadata.get(field)
-                        if field_type is int and isinstance(value, bool):
-                            raise CatalogError(f"{info_path}: {field} must be an integer")
-                        if not isinstance(value, field_type) or (
-                            isinstance(value, str) and not value.strip()
-                        ):
-                            raise CatalogError(f"{info_path}: invalid {field}")
-                    themes.append(metadata)
+                    themes.append(_theme_metadata(archive.read(info_path), info_path))
                 return themes
         except (zipfile.BadZipFile, plistlib.InvalidFileException) as error:
             raise CatalogError(f"invalid theme archive: {error}") from error
 
 
 def _screenshot(github: GitHub, repository: dict[str, Any]) -> str | None:
+    """Pick a preview image, or None.
+
+    A screenshot is presentation only, so every lookup failure here degrades to
+    no image rather than costing the repository its listing.
+    """
     branch = repository["default_branch"]
-    tree = github.json(
-        f"/repos/{repository['full_name']}/git/trees/{urllib.parse.quote(branch)}?recursive=1"
-    )
+    try:
+        tree = github.json(
+            f"/repos/{repository['full_name']}/git/trees/{urllib.parse.quote(branch)}?recursive=1"
+        )
+    except CatalogError:
+        return _readme_screenshot(github, repository)
     candidates: list[tuple[int, str]] = []
     for item in tree.get("tree", []):
         path = item.get("path", "")
@@ -258,7 +335,6 @@ def _theme_record(
         creator_name=metadata["CreatorName"],
         creator_url=metadata["CreatorHomePage"],
         author_github_url=repository["owner"]["html_url"],
-        version=metadata["Version"],
         repository=repository["full_name"],
         repository_url=repository["html_url"],
         description=display.get("description")
@@ -364,20 +440,19 @@ def index_collections(github: GitHub, path: Path) -> tuple[list[Theme], list[dic
                 found, errors = [], [str(error)]
             themes.extend(found)
             diagnostics.append({"repository": label, "themes": len(found), "errors": errors})
-            status = f"{len(found)} theme{'s' if len(found) != 1 else ''}"
-            print(f"{label}: {status}")
+            _report(label, found, errors)
     return themes, diagnostics
 
 
-def index_repository(github: GitHub, repository: dict[str, Any]) -> tuple[list[Theme], list[str]]:
+def index_repository(
+    github: GitHub, repository: dict[str, Any], asset_themes: dict[str, list[str]]
+) -> tuple[list[Theme], list[str]]:
     full_name = repository["full_name"]
-    releases = github.json(f"/repos/{full_name}/releases?per_page=100")
-    released = [release for release in releases if not release["draft"]]
-    stable_releases = [release for release in released if not release["prerelease"]]
-    if not stable_releases:
+    try:
+        latest = github.json(f"/repos/{full_name}/releases/latest")
+    except CatalogNotFound:
         return [], ["no published release"]
 
-    latest = stable_releases[0]
     assets = [
         asset
         for asset in latest["assets"]
@@ -398,21 +473,19 @@ def index_repository(github: GitHub, repository: dict[str, Any]) -> tuple[list[T
         except CatalogError as error:
             errors.append(f"{asset['name']}: {error}")
             metadata_by_asset_id[asset["id"]] = []
+        asset_themes[str(asset["id"])] = [
+            metadata["ThemeIdentifier"] for metadata in metadata_by_asset_id[asset["id"]]
+        ]
 
+    releases = github.json(f"/repos/{full_name}/releases?per_page=100")
     downloads_by_theme: dict[str, int] = {}
-    for release in released:
+    for release in releases:
+        if release["draft"]:
+            continue
         for asset in release["assets"]:
             if not asset["name"].lower().endswith(".nnwtheme.zip"):
                 continue
-            if asset["id"] not in metadata_by_asset_id:
-                try:
-                    metadata_by_asset_id[asset["id"]] = themes_in_asset(
-                        github.bytes(asset["browser_download_url"]), asset["name"]
-                    )
-                except CatalogError:
-                    metadata_by_asset_id[asset["id"]] = []
-            for metadata in metadata_by_asset_id[asset["id"]]:
-                identifier = metadata["ThemeIdentifier"]
+            for identifier in _asset_identifiers(github, asset, asset_themes):
                 downloads_by_theme[identifier] = (
                     downloads_by_theme.get(identifier, 0) + asset["download_count"]
                 )
@@ -437,34 +510,81 @@ def index_repository(github: GitHub, repository: dict[str, Any]) -> tuple[list[T
     return themes, errors
 
 
-def apply_download_history(
-    themes: list[Theme], path: Path, now: datetime | None = None
-) -> tuple[list[Theme], str]:
-    now = now or datetime.now(UTC)
-    history: dict[str, Any] = {"snapshots": []}
-    if path.exists():
-        history = json.loads(path.read_text())
+def _asset_identifiers(
+    github: GitHub, asset: dict[str, Any], asset_themes: dict[str, list[str]]
+) -> list[str]:
+    """Return the theme identifiers an uploaded asset contains.
 
-    snapshots = history.get("snapshots", [])
+    A release asset is immutable, so this mapping is cached across runs. Only
+    successful validations are cached; a failed download must stay retryable
+    instead of permanently recording the asset as empty.
+    """
+    key = str(asset["id"])
+    if key in asset_themes:
+        return asset_themes[key]
+    try:
+        metadata_items = themes_in_asset(github.bytes(asset["browser_download_url"]), asset["name"])
+    except CatalogError:
+        return []
+    identifiers = [metadata["ThemeIdentifier"] for metadata in metadata_items]
+    asset_themes[key] = identifiers
+    return identifiers
+
+
+def load_cache(path: Path) -> dict[str, Any]:
+    """Read the rolling build cache, tolerating a missing or corrupt file.
+
+    The cache is restored from an Actions cache entry that can be evicted or
+    written by an older revision, so a bad file degrades to a cold start rather
+    than failing the run.
+    """
+    cache: dict[str, Any] = {"snapshots": [], "assets": {}}
+    if not path.exists():
+        return cache
+    try:
+        stored = json.loads(path.read_text())
+    except ValueError as error:
+        print(f"Ignoring unreadable cache at {path}: {error}")
+        return cache
+    if not isinstance(stored, dict):
+        return cache
+    if isinstance(stored.get("snapshots"), list):
+        cache["snapshots"] = stored["snapshots"]
+    if isinstance(stored.get("assets"), dict):
+        cache["assets"] = stored["assets"]
+    return cache
+
+
+def save_cache(path: Path, cache: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n")
+
+
+def _captured_at(snapshot: dict[str, Any]) -> datetime:
+    captured = datetime.fromisoformat(snapshot["captured_at"])
+    return captured if captured.tzinfo else captured.replace(tzinfo=UTC)
+
+
+def apply_download_history(
+    themes: list[Theme], cache: dict[str, Any], now: datetime | None = None
+) -> list[Theme]:
+    now = now or datetime.now(UTC)
+    snapshots = [snapshot for snapshot in cache.get("snapshots", []) if "captured_at" in snapshot]
+
     cutoff = now - timedelta(days=7)
-    eligible = [
-        snapshot
-        for snapshot in snapshots
-        if datetime.fromisoformat(snapshot["captured_at"]) <= cutoff
-    ]
-    baseline = max(eligible, key=lambda item: item["captured_at"], default=None)
+    eligible = [snapshot for snapshot in snapshots if _captured_at(snapshot) <= cutoff]
+    baseline = max(eligible, key=_captured_at, default=None)
 
     measured: list[Theme] = []
     for theme in themes:
         weekly_downloads = None
         if baseline is not None and theme.downloads is not None:
-            previous = baseline["downloads"].get(theme.id)
+            previous = baseline.get("downloads", {}).get(theme.id)
             if previous is not None:
                 weekly_downloads = max(0, theme.downloads - previous)
         measured.append(replace(theme, downloads_last_7_days=weekly_downloads))
 
-    today = now.date().isoformat()
-    if not any(snapshot["captured_at"][:10] == today for snapshot in snapshots):
+    if not any(_captured_at(snapshot).date() == now.date() for snapshot in snapshots):
         snapshots.append(
             {
                 "captured_at": now.isoformat(),
@@ -474,21 +594,24 @@ def apply_download_history(
             }
         )
     retention_cutoff = now - timedelta(days=15)
-    snapshots = [
-        snapshot
-        for snapshot in snapshots
-        if datetime.fromisoformat(snapshot["captured_at"]) >= retention_cutoff
-    ]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"snapshots": snapshots}, indent=2) + "\n")
-    return measured, snapshots[0]["captured_at"]
+    cache["snapshots"] = sorted(
+        (snapshot for snapshot in snapshots if _captured_at(snapshot) >= retention_cutoff),
+        key=_captured_at,
+    )
+    return measured
 
 
 def build_catalog(
     output: Path,
     collections: Path = Path("catalog/collections.json"),
     history: Path = Path(".cache/download-history.json"),
+    *,
+    allow_shrink: bool = False,
 ) -> dict[str, Any]:
+    previous_count = _published_theme_count(output)
+    cache = load_cache(history)
+    asset_themes = cache["assets"]
+
     github = GitHub(_github_token())
     repositories = discover_repositories(github)
     themes: list[Theme] = []
@@ -497,7 +620,7 @@ def build_catalog(
         if repository["archived"] or repository["fork"]:
             continue
         try:
-            found, errors = index_repository(github, repository)
+            found, errors = index_repository(github, repository, asset_themes)
         except CatalogError as error:
             found, errors = [], [str(error)]
         themes.extend(found)
@@ -508,8 +631,7 @@ def build_catalog(
                 "errors": errors,
             }
         )
-        status = f"{len(found)} theme{'s' if len(found) != 1 else ''}"
-        print(f"{repository['full_name']}: {status}")
+        _report(repository["full_name"], found, errors)
 
     curated_themes, curated_diagnostics = index_collections(github, collections)
     themes.extend(curated_themes)
@@ -517,21 +639,59 @@ def build_catalog(
 
     unique_themes: dict[str, Theme] = {}
     for theme in themes:
-        unique_themes.setdefault(theme.id, theme)
-    measured_themes, tracking_since = apply_download_history(list(unique_themes.values()), history)
+        if theme.id in unique_themes:
+            print(f"Ignoring duplicate {theme.id} from {theme.repository}")
+            continue
+        unique_themes[theme.id] = theme
+
+    if not allow_shrink and previous_count:
+        floor = int(previous_count * MIN_CATALOG_RETENTION)
+        if len(unique_themes) < floor:
+            raise CatalogAborted(
+                f"refusing to publish {len(unique_themes)} themes after {previous_count}; "
+                f"rerun when GitHub is healthy or pass --allow-shrink"
+            )
+
+    measured_themes = apply_download_history(list(unique_themes.values()), cache)
+    save_cache(history, cache)
     payload = {
         "generated_at": datetime.now(UTC).isoformat(),
-        "download_tracking_since": tracking_since,
         "themes": [
             asdict(theme)
             for theme in sorted(measured_themes, key=lambda item: item.name.casefold())
         ],
-        "diagnostics": diagnostics,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     print(f"Wrote {len(unique_themes)} themes to {output}")
+    _report_failures(diagnostics)
     return payload
+
+
+def _published_theme_count(output: Path) -> int:
+    """Count the themes in the catalog this run would replace."""
+    try:
+        published = json.loads(output.read_text())
+    except OSError, ValueError:
+        return 0
+    themes = published.get("themes") if isinstance(published, dict) else None
+    return len(themes) if isinstance(themes, list) else 0
+
+
+def _report(label: str, found: list[Theme], errors: list[str]) -> None:
+    print(f"{label}: {len(found)} theme{'s' if len(found) != 1 else ''}")
+    for error in errors:
+        print(f"  {error}")
+
+
+def _report_failures(diagnostics: list[dict[str, Any]]) -> None:
+    failed = [entry for entry in diagnostics if entry["errors"]]
+    if not failed:
+        return
+    print(f"\n{len(failed)} candidate(s) produced no listing:")
+    for entry in failed:
+        for error in entry["errors"]:
+            print(f"  {entry['repository']}: {error}")
 
 
 def main() -> None:
@@ -539,8 +699,16 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("data/themes.json"))
     parser.add_argument("--collections", type=Path, default=Path("catalog/collections.json"))
     parser.add_argument("--history", type=Path, default=Path(".cache/download-history.json"))
+    parser.add_argument(
+        "--allow-shrink",
+        action="store_true",
+        help="publish even if far fewer themes qualified than in the current catalog",
+    )
     args = parser.parse_args()
-    build_catalog(args.output, args.collections, args.history)
+    try:
+        build_catalog(args.output, args.collections, args.history, allow_shrink=args.allow_shrink)
+    except CatalogAborted as error:
+        raise SystemExit(f"Catalog build aborted: {error}") from error
 
 
 if __name__ == "__main__":

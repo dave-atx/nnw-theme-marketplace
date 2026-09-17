@@ -54,8 +54,10 @@ Run the same checks used in CI:
 uv run ruff check .
 uv run ruff format --check .
 uv run python -m unittest discover -s tests -v
-hugo --panicOnWarning
+hugo --minify --panicOnWarning
 ```
+
+The JSON Feed tests shell out to Hugo and skip when it is not installed.
 
 After changing Python, run Ruff before any other validation:
 
@@ -68,13 +70,21 @@ Set `GITHUB_TOKEN` or `GH_TOKEN` when refreshing the catalog to avoid GitHub's
 anonymous API limit. When GitHub CLI is installed and authenticated, the
 indexer uses its token automatically.
 
+`build-catalog` refuses to overwrite the catalog when far fewer themes qualify
+than the committed one lists, so a GitHub outage cannot publish a nearly empty
+site. Pass `--allow-shrink` when listings genuinely went away.
+
 ## Download trends
 
 GitHub reports lifetime asset downloads but not historical counts. The indexer
-derives seven-day activity from daily snapshots in
-`.cache/download-history.json`. Git ignores this file; GitHub Actions carries
-it between builds using a daily cache key. A new or evicted cache produces a
-seven-day warm-up message rather than an invented trend.
+derives seven-day activity from daily snapshots in `.cache/download-history.json`.
+Git ignores this file; GitHub Actions carries it between builds using a daily
+cache key. Until a snapshot at least seven days old exists, themes carry no
+trend and the Trending section stays hidden rather than showing an invented one.
+
+The same file caches the immutable mapping from a release asset to the theme
+identifiers it contains, so historical release assets are validated once
+instead of on every scheduled build.
 
 ## Deployment
 

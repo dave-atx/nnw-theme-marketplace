@@ -23,7 +23,7 @@ serves only static output.
 | `src/marketplace/catalog.py` | GitHub discovery, archive validation, metadata enrichment, and trend calculation |
 | `catalog/collections.json` | Reviewed exceptions for established catalogs and tag-based themes |
 | `catalog/` | Source-controlled catalog policy; runtime history must not be stored here |
-| `.cache/download-history.json` | Ignored rolling download snapshots restored through Actions cache |
+| `.cache/download-history.json` | Ignored build cache: rolling download snapshots plus the release-asset to theme-identifier map, restored through Actions cache |
 | `data/themes.json` | Generated Hugo input, kept in Git so Hugo can run without network access |
 | `layouts/` | Hugo HTML and JSON Feed templates |
 | `assets/` | Hugo-managed CSS and JavaScript |
@@ -68,6 +68,18 @@ schemes clickable in feed content. That page requires a click or tap before
 navigating to the catalogued `netnewswire://` install URL. It accepts only a
 theme identifier present in the generated catalog.
 
+## Feed dates
+
+Each feed item's `date_published` is its release date. `date_modified` is the
+later of that release date and the `feedContentModified` site parameter.
+
+That parameter is maintained by hand and records when the JSON Feed template
+last changed the rendered `content_html`. Editing the template changes every
+item's content without changing any release date, and nothing can derive that
+fact automatically, so bump `feedContentModified` in `hugo.toml` whenever you
+change what `index.jsonfeed.json` renders. Taking the later of the two dates
+keeps an item from reporting a modification that precedes its publication.
+
 ## Trend history
 
 GitHub exposes current lifetime download totals only. Each UTC day, the first
@@ -78,7 +90,31 @@ days old and clamps negative deltas to zero. It keeps 15 days of snapshots.
 Actions cache entries are immutable, so the workflow uses a new key per UTC
 day and restores the newest prior key by prefix. Later builds on the same day
 restore the exact cache entry. If history disappears, weekly values remain
-unknown until a complete baseline exists.
+unknown until a complete baseline exists and the Trending section stays hidden.
+
+The same cache file stores which theme identifiers each release asset contains.
+A release asset is immutable, so that mapping is computed once and reused,
+which keeps lifetime download totals from re-downloading and re-validating
+every historical asset on every scheduled build. Only successful validations
+are cached, so a failed download stays retryable. Because the day's first build
+is the one that writes the cache, assets first seen later in a day are resolved
+again until the next day's first build.
+
+## Failure handling
+
+Repository metadata and theme archives are untrusted, so any one candidate can
+fail without ending the run: parse and validation failures raise `CatalogError`,
+which the per-candidate loops record as a diagnostic and print to the build log.
+
+Two conditions are fatal instead. Exhausted GitHub API quota raises
+`CatalogAborted`, because continuing would turn every remaining repository into
+a spurious "no themes" result. And the generator refuses to write a catalog
+holding less than 75% of the themes the committed one lists, so a partial
+outage cannot replace a complete site with an empty one. `--allow-shrink`
+overrides that guard when listings really did go away.
+
+Transient HTTP failures and connection errors are retried with backoff before
+they become a `CatalogError`.
 
 ## CI and deployment
 

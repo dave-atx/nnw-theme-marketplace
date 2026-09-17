@@ -15,6 +15,15 @@
       {{- $name := $theme.name | htmlEscape }}
       {{- $installURL := printf "install/?theme=%s" ($theme.id | urlquery) | absURL | htmlEscape }}
       {{- $repositoryURL := $theme.repository_url | htmlEscape }}
+      {{- /* feedContentModified stamps a change to this template, which alters every
+             item's rendered content without changing its release date. Take the later
+             of the two so an item is never modified before it was published. */}}
+      {{- $modified := $theme.released_at }}
+      {{- with site.Params.feedContentModified }}
+        {{- if gt (time.AsTime .) (time.AsTime $theme.released_at) }}
+          {{- $modified = . }}
+        {{- end }}
+      {{- end }}
       {{- $image := "" }}
       {{- with $theme.screenshot_url }}
         {{- $image = printf `<p><img src="%s" alt="Preview of %s"></p>` (. | htmlEscape) $name }}
@@ -28,7 +37,7 @@
         "summary": {{ $theme.description | jsonify }},
         "content_html": {{ $content | jsonify }},
         "date_published": {{ $theme.released_at | jsonify }},
-        "date_modified": {{ site.Params.feedContentModified | default $theme.released_at | jsonify }},
+        "date_modified": {{ $modified | jsonify }},
         {{- with $theme.screenshot_url }}
         "image": {{ . | jsonify }},
         {{- end }}

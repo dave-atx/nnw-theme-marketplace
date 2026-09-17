@@ -14,8 +14,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ github.token }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -37,7 +38,13 @@ jobs:
           uv run ruff check .
           uv run ruff format --check .
 
-      - name: Test Python
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.166.0"
+          extended: true
+
+      - name: Run tests
         run: uv run python -m unittest discover -s tests -v
 
       - name: Set UTC cache date
@@ -55,13 +62,9 @@ jobs:
 
       - name: Refresh theme catalog
         if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: uv run build-catalog
-
-      - name: Install Hugo
-        uses: peaceiris/actions-hugo@v3
-        with:
-          hugo-version: "0.166.0"
-          extended: true
 
       - name: Build site
         run: hugo --minify --panicOnWarning
