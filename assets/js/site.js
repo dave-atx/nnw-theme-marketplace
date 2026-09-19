@@ -28,3 +28,29 @@ function updateCatalog() {
 search.addEventListener("input", updateCatalog);
 sort.addEventListener("change", updateCatalog);
 updateCatalog();
+
+const createLink = document.querySelector("[data-open-create]");
+const createDialog = document.querySelector("[data-create-dialog]");
+const copyPrompt = document.querySelector("[data-copy-prompt]");
+
+createLink.addEventListener("click", (event) => {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+  event.preventDefault();
+  createDialog.showModal();
+});
+
+copyPrompt.addEventListener("click", async () => {
+  const prompt = document.querySelector("[data-create-prompt]").textContent.trim();
+  try {
+    await navigator.clipboard.writeText(prompt);
+    copyPrompt.textContent = "Copied!";
+  } catch {
+    copyPrompt.textContent = "Select and copy the prompt above";
+  }
+});
+
+createDialog.addEventListener("close", () => {
+  copyPrompt.textContent = "Copy prompt";
+});

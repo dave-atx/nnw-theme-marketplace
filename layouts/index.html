@@ -11,8 +11,18 @@
         <p class="eyebrow">A community catalog</p>
         <h1>Make your feeds<br><em>feel like yours.</em></h1>
         <p class="lede">Discover thoughtful, community-made themes for <a href="https://netnewswire.com/">NetNewsWire</a>. Install one in a click and get back to reading.</p>
-        <a class="hero-create" href="https://github.com/dave-atx/netnewswire-theme-template">Create a theme <span aria-hidden="true">↗</span></a>
+        <a class="hero-create" href="https://github.com/dave-atx/netnewswire-theme-template" data-open-create>Create a theme <span aria-hidden="true">↗</span></a>
       </section>
+
+      <dialog class="create-dialog" aria-labelledby="create-title" data-create-dialog>
+        <form method="dialog"><button class="create-close" aria-label="Close">×</button></form>
+        <p class="eyebrow">Make it yours</p>
+        <h2 id="create-title">Create a theme</h2>
+        <p>Working with an agent? Give it this prompt:</p>
+        <div class="create-prompt" data-create-prompt>Help me make a NetNewsWire theme with dave-atx/netnewswire-theme-template. Guide me through setup and design. I want [describe the look or reading experience].</div>
+        <button class="create-copy" type="button" data-copy-prompt>Copy prompt</button>
+        <p class="create-manual">Doing it yourself? Open the <a href="https://github.com/dave-atx/netnewswire-theme-template">theme template repository</a> and choose <strong>Use this template → Create a new repository</strong>.</p>
+      </dialog>
 
       {{ $trending := first 3 (sort (where hugo.Data.themes.themes "downloads_last_7_days" "gt" 0) "downloads_last_7_days" "desc") }}
       {{ with $trending }}
