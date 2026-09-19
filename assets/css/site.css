@@ -108,6 +108,20 @@ h1 em { color: var(--accent); font-weight: 400; }
   font-size: 18px;
   line-height: 1.65;
 }
+.hero-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.hero-create:hover { background: var(--accent-hover); }
 
 .catalog {
   padding: 48px max(40px, calc((100vw - 1240px) / 2)) 100px;
@@ -318,6 +332,7 @@ h1 em { color: var(--accent); font-weight: 400; }
 
   .brand-mark span { background: #0d0d0f; }
   .version { background: rgba(0, 0, 0, .78); }
+  .hero-create { color: #0d0d0f; }
 }
 
 @media (max-width: 640px) {

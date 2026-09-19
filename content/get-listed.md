@@ -5,6 +5,10 @@ description: "Publish a valid NetNewsWire theme release and the marketplace will
 
 The marketplace primarily indexes community themes on GitHub automatically. There is no submission form. A listing is not an endorsement by [NetNewsWire](https://netnewswire.com/) or this marketplace, and it does not mean that a theme has received a security review.
 
+## Create a theme
+
+New to theme authoring? Start with the [NetNewsWire theme template](https://github.com/dave-atx/netnewswire-theme-template). Choose **Use this template → Create a new repository** on GitHub, not **Fork**. It includes guided setup, a preview gallery, and automated checks and release builds. You can follow its instructions yourself or work with a coding agent.
+
 ## Listing requirements
 
 1. Use a public, non-archived GitHub repository that is not a fork.
