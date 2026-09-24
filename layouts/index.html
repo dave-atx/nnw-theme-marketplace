@@ -65,6 +65,7 @@
               <span class="sr-only">Sort themes</span>
               <select data-sort>
                 <option value="popular">Most downloaded</option>
+                <option value="stars">Most starred</option>
                 <option value="recent">Recently released</option>
                 <option value="name">Name</option>
               </select>
@@ -79,7 +80,7 @@
 
         <div class="theme-grid" data-theme-grid>
           {{ range hugo.Data.themes.themes }}
-            <article id="{{ .id | anchorize }}" class="theme-card" data-theme data-name="{{ .name | lower }}" data-repository="{{ .repository | lower }}" data-downloads="{{ .downloads | default 0 }}" data-released="{{ time.AsTime .released_at | time.Format "20060102150405" }}">
+            <article id="{{ .id | anchorize }}" class="theme-card" data-theme data-name="{{ .name | lower }}" data-repository="{{ .repository | lower }}" data-downloads="{{ .downloads | default 0 }}" data-stars="{{ .stars }}" data-released="{{ time.AsTime .released_at | time.Format "20060102150405" }}">
               <div class="theme-preview">
                 {{ if .screenshot_url }}
                   <img src="{{ .screenshot_url }}" alt="Preview of {{ .name }}" loading="lazy">

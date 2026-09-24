@@ -17,6 +17,10 @@ function updateCatalog() {
 
   const comparators = {
     popular: (a, b) => Number(b.dataset.downloads) - Number(a.dataset.downloads),
+    stars: (a, b) =>
+      Number(b.dataset.stars) - Number(a.dataset.stars) ||
+      comparators.popular(a, b) ||
+      comparators.name(a, b),
     recent: (a, b) => Number(b.dataset.released) - Number(a.dataset.released),
     name: (a, b) => a.dataset.name.localeCompare(b.dataset.name),
   };
