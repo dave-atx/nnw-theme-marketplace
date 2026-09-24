@@ -57,7 +57,7 @@ uv run python -m unittest discover -s tests -v
 hugo --minify --panicOnWarning
 ```
 
-The JSON Feed tests shell out to Hugo and skip when it is not installed.
+The JSON Feed and Trending tests shell out to Hugo and skip when it is not installed.
 
 After changing Python, run Ruff before any other validation:
 
@@ -81,6 +81,16 @@ derives seven-day activity from daily snapshots in `.cache/download-history.json
 Git ignores this file; GitHub Actions carries it between builds using a daily
 cache key. Until a snapshot at least seven days old exists, themes carry no
 trend and the Trending section stays hidden rather than showing an invented one.
+
+Local catalogs usually lack that history too. To see the Trending section while
+working on it, serve the site with sample weekly counts overlaid on the
+committed catalog:
+
+```sh
+uv run preview-trending
+```
+
+Extra arguments pass through to `hugo server`, for example `--port 1314`.
 
 The same file caches the immutable mapping from a release asset to the theme
 identifiers it contains, so historical release assets are validated once

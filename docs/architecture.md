@@ -21,6 +21,7 @@ serves only static output.
 | Path | Purpose |
 | --- | --- |
 | `src/marketplace/catalog.py` | GitHub discovery, archive validation, metadata enrichment, and trend calculation |
+| `src/marketplace/preview.py` | Sample weekly downloads mounted over `data/` for Trending tests and local preview |
 | `catalog/collections.json` | Reviewed exceptions for established catalogs and tag-based themes |
 | `catalog/` | Source-controlled catalog policy; runtime history must not be stored here |
 | `.cache/download-history.json` | Ignored build cache: rolling download snapshots plus the release-asset to theme-identifier map, restored through Actions cache |
@@ -29,7 +30,7 @@ serves only static output.
 | `assets/` | Hugo-managed CSS and JavaScript |
 | `static/` | Files copied directly to the published site, including feed and browser icons |
 | `content/` | Standalone documentation and install-route content |
-| `tests/` | Python archive-validation and trend-calculation tests |
+| `tests/` | Python archive-validation and trend-calculation tests, plus Hugo render tests for the feed and Trending section |
 | `.github/workflows/pages.yml` | CI, scheduled catalog refresh, and Pages deployment |
 
 ## Discovery and validation
@@ -91,6 +92,12 @@ Actions cache entries are immutable, so the workflow uses a new key per UTC
 day and restores the newest prior key by prefix. Later builds on the same day
 restore the exact cache entry. If history disappears, weekly values remain
 unknown until a complete baseline exists and the Trending section stays hidden.
+
+The committed `data/themes.json` therefore carries no weekly counts, so
+`marketplace.preview` copies it with sample counts into a temporary data
+directory that a Hugo module mount places ahead of `data/`. The Trending render
+tests and `uv run preview-trending` both use this overlay; neither commits a
+second catalog that could drift from the generated one.
 
 The same cache file stores which theme identifiers each release asset contains.
 A release asset is immutable, so that mapping is computed once and reused,
