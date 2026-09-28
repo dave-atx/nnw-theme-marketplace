@@ -59,6 +59,17 @@ class CatalogAborted(RuntimeError):
 
 
 @dataclass(frozen=True)
+class PastRelease:
+    """An earlier release of a theme, kept so the feed can show its notes."""
+
+    release: str
+    released_at: str
+    asset_name: str
+    asset_url: str
+    release_notes: str | None
+
+
+@dataclass(frozen=True)
 class Theme:
     id: str
     name: str
@@ -78,6 +89,7 @@ class Theme:
     install_url: str
     screenshot_url: str | None
     release_notes: str | None = None
+    release_history: tuple[PastRelease, ...] = ()
 
 
 def _github_token() -> str | None:
@@ -325,6 +337,35 @@ def _release_notes(release: dict[str, Any]) -> str | None:
     return notes or None
 
 
+def _past_release(release: dict[str, Any], asset_name: str, asset_url: str) -> PastRelease:
+    return PastRelease(
+        release=release["tag_name"],
+        released_at=release["published_at"],
+        asset_name=asset_name,
+        asset_url=asset_url,
+        release_notes=_release_notes(release),
+    )
+
+
+def _is_earlier_release(release: dict[str, Any], current_tag: str, cutoff: str) -> bool:
+    """Whether a release predates the listed one and belongs in its history.
+
+    GitHub timestamps share one ISO 8601 UTC format, so they compare as strings.
+    """
+    published_at = release.get("published_at")
+    return (
+        not release.get("draft")
+        and not release.get("prerelease")
+        and release.get("tag_name") != current_tag
+        and isinstance(published_at, str)
+        and published_at < cutoff
+    )
+
+
+def _newest_first(history: list[PastRelease]) -> tuple[PastRelease, ...]:
+    return tuple(sorted(history, key=lambda past: past.released_at, reverse=True))
+
+
 def _install_url(asset_url: str) -> str:
     encoded = urllib.parse.quote(asset_url, safe="")
     return f"netnewswire://theme/add?url={encoded}"
@@ -341,6 +382,7 @@ def _theme_record(
     downloads: int | None,
     screenshot_url: str | None,
     release_notes: str | None = None,
+    release_history: tuple[PastRelease, ...] = (),
     display: dict[str, Any] | None = None,
 ) -> Theme:
     display = display or {}
@@ -365,10 +407,66 @@ def _theme_record(
         install_url=_install_url(asset_url),
         screenshot_url=display.get("screenshot_url", screenshot_url),
         release_notes=release_notes,
+        release_history=release_history,
     )
 
 
-def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme], list[str]]:
+def _curated_history(
+    github: GitHub,
+    item: dict[str, Any],
+    *,
+    tag: str,
+    cutoff: str,
+    identifiers: list[str],
+    asset_themes: dict[str, list[str]],
+) -> tuple[dict[str, Any] | None, dict[str, tuple[PastRelease, ...]]]:
+    """Return a curated theme's own release for its tag and its earlier releases.
+
+    Only a package built from the source repository has a history of its own; a
+    mirror's releases describe the whole collection. Release assets are checked
+    for the theme like any other asset. A tag archive is GitHub's snapshot of the
+    same repository, so its earlier tags are taken as earlier versions.
+    """
+    package = item["package"]
+    if package.get("repository", item["source_repository"]) != item["source_repository"]:
+        return None, {}
+    try:
+        releases = github.json(f"/repos/{item['source_repository']}/releases?per_page=100")
+    except CatalogError:
+        return None, {}
+    current = next((release for release in releases if release["tag_name"] == tag), None)
+    if current and isinstance(current.get("published_at"), str):
+        cutoff = current["published_at"]
+
+    history: dict[str, list[PastRelease]] = {identifier: [] for identifier in identifiers}
+    for release in releases:
+        if not _is_earlier_release(release, tag, cutoff):
+            continue
+        if package["kind"] == "tag_archive":
+            quoted = urllib.parse.quote(release["tag_name"], safe="")
+            repository_name = item["source_repository"].rsplit("/", 1)[-1]
+            asset_name = f"{repository_name}-{release['tag_name']}.zip"
+            asset_url = (
+                f"https://github.com/{item['source_repository']}/archive/refs/tags/{quoted}.zip"
+            )
+            for identifier in identifiers:
+                history[identifier].append(_past_release(release, asset_name, asset_url))
+            continue
+        for asset in release["assets"]:
+            if asset["name"] != package["asset"]:
+                continue
+            contained = _asset_identifiers(github, asset, asset_themes)
+            for identifier in identifiers:
+                if identifier in contained:
+                    history[identifier].append(
+                        _past_release(release, asset["name"], asset["browser_download_url"])
+                    )
+    return current, {identifier: _newest_first(past) for identifier, past in history.items()}
+
+
+def index_curated_item(
+    github: GitHub, item: dict[str, Any], asset_themes: dict[str, list[str]] | None = None
+) -> tuple[list[Theme], list[str]]:
     source_repository = github.json(f"/repos/{item['source_repository']}")
     if source_repository["archived"]:
         return [], ["source repository is archived"]
@@ -426,6 +524,17 @@ def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme
     if len(metadata_items) > 1 and not identifier:
         return [], [f"{asset_name}: contains multiple themes; theme_identifier is required"]
 
+    current, history = _curated_history(
+        github,
+        item,
+        tag=tag,
+        cutoff=released_at,
+        identifiers=[metadata["ThemeIdentifier"] for metadata in metadata_items],
+        asset_themes={} if asset_themes is None else asset_themes,
+    )
+    if kind == "tag_archive" and current is not None:
+        release_notes = _release_notes(current)
+
     screenshot_url = item.get("display", {}).get("screenshot_url")
     if not screenshot_url:
         screenshot_url = _screenshot(github, source_repository)
@@ -440,6 +549,7 @@ def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme
             downloads=downloads,
             screenshot_url=screenshot_url,
             release_notes=release_notes,
+            release_history=history.get(metadata["ThemeIdentifier"], ()),
             display=item.get("display"),
         )
         for metadata in metadata_items
@@ -447,7 +557,9 @@ def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme
     return themes, []
 
 
-def index_collections(github: GitHub, path: Path) -> tuple[list[Theme], list[dict[str, Any]]]:
+def index_collections(
+    github: GitHub, path: Path, asset_themes: dict[str, list[str]] | None = None
+) -> tuple[list[Theme], list[dict[str, Any]]]:
     if not path.exists():
         return [], []
     catalog = json.loads(path.read_text())
@@ -457,7 +569,7 @@ def index_collections(github: GitHub, path: Path) -> tuple[list[Theme], list[dic
         for item in collection.get("items", []):
             label = f"{collection['name']}: {item['source_repository']}"
             try:
-                found, errors = index_curated_item(github, item)
+                found, errors = index_curated_item(github, item, asset_themes)
             except (CatalogError, KeyError, urllib.error.HTTPError) as error:
                 found, errors = [], [str(error)]
             themes.extend(found)
@@ -501,9 +613,11 @@ def index_repository(
 
     releases = github.json(f"/repos/{full_name}/releases?per_page=100")
     downloads_by_theme: dict[str, int] = {}
+    history_by_theme: dict[str, list[PastRelease]] = {}
     for release in releases:
         if release["draft"]:
             continue
+        earlier = _is_earlier_release(release, latest["tag_name"], latest["published_at"])
         for asset in release["assets"]:
             if not asset["name"].lower().endswith(".nnwtheme.zip"):
                 continue
@@ -511,6 +625,11 @@ def index_repository(
                 downloads_by_theme[identifier] = (
                     downloads_by_theme.get(identifier, 0) + asset["download_count"]
                 )
+                past = history_by_theme.setdefault(identifier, [])
+                if earlier and all(entry.release != release["tag_name"] for entry in past):
+                    past.append(
+                        _past_release(release, asset["name"], asset["browser_download_url"])
+                    )
 
     for asset in assets:
         metadata_items = metadata_by_asset_id[asset["id"]]
@@ -526,6 +645,9 @@ def index_repository(
                     downloads=downloads_by_theme.get(metadata["ThemeIdentifier"], 0),
                     screenshot_url=screenshot_url,
                     release_notes=_release_notes(latest),
+                    release_history=_newest_first(
+                        history_by_theme.get(metadata["ThemeIdentifier"], [])
+                    ),
                 )
             )
         if not metadata_items:
@@ -656,7 +778,7 @@ def build_catalog(
         )
         _report(repository["full_name"], found, errors)
 
-    curated_themes, curated_diagnostics = index_collections(github, collections)
+    curated_themes, curated_diagnostics = index_collections(github, collections, asset_themes)
     themes.extend(curated_themes)
     diagnostics.extend(curated_diagnostics)
 

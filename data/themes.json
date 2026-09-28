@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T03:08:41.563325+00:00",
+  "generated_at": "2026-09-28T06:46:04.489114+00:00",
   "themes": [
     {
       "id": "uk.co.dx13.nnwthemes.allmine",
@@ -15,11 +15,12 @@
       "released_at": "2024-05-19T18:21:42Z",
       "asset_name": "nnw-allmine-main.zip",
       "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.2.0/nnw-allmine-main.zip",
-      "downloads": 613,
-      "downloads_last_7_days": 134,
+      "downloads": 617,
+      "downloads_last_7_days": 138,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.2.0%2Fnnw-allmine-main.zip",
       "screenshot_url": "https://raw.githubusercontent.com/mikerhodes/nnw-allmine/main/images/screenshot.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "com.github.atlantic-breeze",
@@ -35,11 +36,34 @@
       "released_at": "2026-09-27T17:56:57Z",
       "asset_name": "Atlantic.Breeze.nnwtheme.zip",
       "asset_url": "https://github.com/ncFoCo/atlantic-breeze/releases/download/v8/Atlantic.Breeze.nnwtheme.zip",
-      "downloads": 88,
+      "downloads": 96,
       "downloads_last_7_days": null,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FncFoCo%2Fatlantic-breeze%2Freleases%2Fdownload%2Fv8%2FAtlantic.Breeze.nnwtheme.zip",
       "screenshot_url": "https://raw.githubusercontent.com/ncFoCo/atlantic-breeze/main/screenshots/theme-preview.png",
-      "release_notes": "## What's Changed\n* Style adjustments by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/8\n\n\n**Full Changelog**: https://github.com/ncFoCo/atlantic-breeze/compare/v7...v8"
+      "release_notes": "## What's Changed\n* Style adjustments by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/8\n\n\n**Full Changelog**: https://github.com/ncFoCo/atlantic-breeze/compare/v7...v8",
+      "release_history": [
+        {
+          "release": "v7",
+          "released_at": "2026-09-26T19:55:35Z",
+          "asset_name": "Atlantic.Breeze.nnwtheme.zip",
+          "asset_url": "https://github.com/ncFoCo/atlantic-breeze/releases/download/v7/Atlantic.Breeze.nnwtheme.zip",
+          "release_notes": "## What's Changed\n* Added the screenshot to README.md by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/4\n* Fixed the CSS issue that breaks NNWs article font size by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/6\n* Version bump to 7 by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/7\n\n\n**Full Changelog**: https://github.com/ncFoCo/atlantic-breeze/compare/v6...v7"
+        },
+        {
+          "release": "v6",
+          "released_at": "2026-09-26T18:32:34Z",
+          "asset_name": "Atlantic.Breeze.nnwtheme.zip",
+          "asset_url": "https://github.com/ncFoCo/atlantic-breeze/releases/download/v6/Atlantic.Breeze.nnwtheme.zip",
+          "release_notes": "## What's Changed\n* Added a light red background hue to the block quote by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/1\n* Optimize theme to better match theatlantic.com by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/2\n* Version bump by @ncFoCo in https://github.com/ncFoCo/atlantic-breeze/pull/3\n\n## New Contributors\n* @ncFoCo made their first contribution in https://github.com/ncFoCo/atlantic-breeze/pull/1\n\n**Full Changelog**: https://github.com/ncFoCo/atlantic-breeze/compare/v4...v6"
+        },
+        {
+          "release": "v4",
+          "released_at": "2026-09-25T02:38:04Z",
+          "asset_name": "Atlantic.Breeze.nnwtheme.zip",
+          "asset_url": "https://github.com/ncFoCo/atlantic-breeze/releases/download/v4/Atlantic.Breeze.nnwtheme.zip",
+          "release_notes": "* Initial release for Atlantic Breeze."
+        }
+      ]
     },
     {
       "id": "com.raisul.netnewswire.calm",
@@ -55,11 +79,83 @@
       "released_at": "2026-08-23T16:08:53Z",
       "asset_name": "Calm.nnwtheme.zip",
       "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.4.1/Calm.nnwtheme.zip",
-      "downloads": 895,
-      "downloads_last_7_days": 836,
+      "downloads": 912,
+      "downloads_last_7_days": 853,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fraisulchowdhury%2Fcalm-nnwtheme%2Freleases%2Fdownload%2Fv1.4.1%2FCalm.nnwtheme.zip",
       "screenshot_url": "https://raw.githubusercontent.com/raisulchowdhury/calm-nnwtheme/main/assets/social-preview.jpg",
-      "release_notes": "# Calm 1.4.1\n\nCalm 1.4.1 is a fundamentals release. It fixes compact iPhone typography,\npreserves authored image colors, and makes the reading map more selective,\nefficient, and accessible without adding reader chrome.\n\n## Reading fixes\n\n- Corrected the compact cascade so the one-point type bump and `1.48` line\n  height take effect without flattening NetNewsWire text-size preferences.\n- Removed light-mode `mix-blend-mode: multiply` from article images and SVGs.\n\n## Reading map\n\n- Hides the map for articles shorter than two viewport heights while continuing\n  to watch for images or other late content that makes the article long enough.\n- Hardens the existing structured-map selection around a coherent heading\n  hierarchy, filters duplicate and common utility headings, and caps the result\n  at eight body destinations.\n- Throttles scroll work to animation frames and caches heading offsets until a\n  real layout change occurs.\n- Refreshes geometry after resize, embedded-media load, or observed content\n  growth.\n- Applies `aria-current=\"location\"` to the active marker.\n- Cancels queued work and removes observers and listeners during compact Split\n  View teardown, then reconstructs cleanly when space returns.\n\nMarkers remain evenly spaced in 1.4.1. Proportional placement should only ship\nafter observation with real readers shows that it improves orientation.\n\n## Validation\n\nThe release adds WebKit coverage for compact typography, light-mode images,\nshort and long articles, mixed heading hierarchies, image/video/audio fixtures,\nmedia-driven reflow, Split View reconstruction, and active-marker\naccessibility. A canonical Chromium screenshot covers visual comparisons."
+      "release_notes": "# Calm 1.4.1\n\nCalm 1.4.1 is a fundamentals release. It fixes compact iPhone typography,\npreserves authored image colors, and makes the reading map more selective,\nefficient, and accessible without adding reader chrome.\n\n## Reading fixes\n\n- Corrected the compact cascade so the one-point type bump and `1.48` line\n  height take effect without flattening NetNewsWire text-size preferences.\n- Removed light-mode `mix-blend-mode: multiply` from article images and SVGs.\n\n## Reading map\n\n- Hides the map for articles shorter than two viewport heights while continuing\n  to watch for images or other late content that makes the article long enough.\n- Hardens the existing structured-map selection around a coherent heading\n  hierarchy, filters duplicate and common utility headings, and caps the result\n  at eight body destinations.\n- Throttles scroll work to animation frames and caches heading offsets until a\n  real layout change occurs.\n- Refreshes geometry after resize, embedded-media load, or observed content\n  growth.\n- Applies `aria-current=\"location\"` to the active marker.\n- Cancels queued work and removes observers and listeners during compact Split\n  View teardown, then reconstructs cleanly when space returns.\n\nMarkers remain evenly spaced in 1.4.1. Proportional placement should only ship\nafter observation with real readers shows that it improves orientation.\n\n## Validation\n\nThe release adds WebKit coverage for compact typography, light-mode images,\nshort and long articles, mixed heading hierarchies, image/video/audio fixtures,\nmedia-driven reflow, Split View reconstruction, and active-marker\naccessibility. A canonical Chromium screenshot covers visual comparisons.",
+      "release_history": [
+        {
+          "release": "v1.4.0",
+          "released_at": "2026-07-25T05:34:42Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.4.0/Calm.nnwtheme.zip",
+          "release_notes": "# Calm 1.4.0\n\n**Navigate long articles without distraction.**\n\nCalm 1.4 adapts its reading map to the article. Structured pieces use major\nheadings as destinations; simpler pieces use five quiet depth markers. Readers\ncan click, tap, use the keyboard, or scrub the rail to move through an article.\nPhone, Split View, and short landscape layouts remove the map entirely.\n\n## Highlights\n\n- A larger, more clearly separated article title on rail-capable layouts.\n- The reading map now sits just outside the centered article column.\n- Feed identity remains visible in the opening metadata, with estimated reading\n  time shown only for articles of four minutes or longer.\n- Missing metadata fields collapse cleanly without leaving stray separators.\n- The persistent statistics footer and visible word count are gone.\n- Structured articles can reveal the active section name on wide Mac layouts\n  during hover, keyboard focus, or scrubbing.\n- iPad keeps marker-only feedback with 44-point targets.\n- Phone, Split View, and short coarse-pointer landscape layouts remain\n  completely rail-free.\n- Entering or leaving iPad Split View now tears down or restores the reading map\n  and its interaction listeners without requiring an article reload.\n\nCalm’s article measure, serif body rhythm, light and dark palettes, media\ntreatment, body-heading scale, keyboard focus, reduced-motion behavior, and\nTap + Scrub interaction are unchanged.\n\n## Installable artifact\n\n- Bundle: `Calm.nnwtheme/`\n- Package: `Calm.nnwtheme.zip`\n- Internal theme version: `11`\n\nInstall from the\n[v1.4.0 release](https://github.com/raisulchowdhury/calm-nnwtheme/releases/tag/v1.4.0)\nor use the NetNewsWire installer URL in the project README."
+        },
+        {
+          "release": "v1.3.1",
+          "released_at": "2026-07-24T22:21:14Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.3.1/Calm.nnwtheme.zip",
+          "release_notes": "Calm 1.3.1 brings the latest local theme state to GitHub everywhere.\n\nHighlights:\n- Removes the section rail and reserved gutter from compact mobile layouts.\n- Tightens phone spacing and line height while preserving wider-screen behavior.\n- Fixes structured heading targets for the desktop section rail.\n- Adds system-accent keyboard focus treatment and 44-point touch targets.\n- Improves reading-statistics contrast and refreshes the screenshots.\n- Ships validation for source/preview parity, responsive rail behavior, interaction polish, and package/source alignment.\n\nThe attached Calm.nnwtheme.zip is identical to the validated package committed at the repository root."
+        },
+        {
+          "release": "v1.2.1",
+          "released_at": "2026-06-25T06:49:05Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.2.1/Calm.nnwtheme.zip",
+          "release_notes": "- Restored `Calm.nnwtheme.zip` to the repository root so the installable package is visible from GitHub's file list.\n- Kept the package content aligned with the `Version` 8 theme source; no theme template or stylesheet behavior changed."
+        },
+        {
+          "release": "v1.2.0",
+          "released_at": "2026-06-25T05:49:21Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.2.0/Calm.nnwtheme.zip",
+          "release_notes": "- Held pointer capture while scrubbing the section rail so a drag no longer ends early when the pointer drifts off the narrow rail.\n- Added quiet styling for `mark`, `kbd`, definition lists, `details`/`summary`, and `audio` so common feed content no longer falls back to browser defaults.\n- Enabled `text-wrap: pretty` on paragraphs and list items where supported.\n- Removed an accidentally re-committed `Calm.nnwtheme.zip` from the repository; zips are published through GitHub Releases.\n- Bumped the internal theme version to `8`."
+        },
+        {
+          "release": "v1.1.3",
+          "released_at": "2026-06-05T23:47:57Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.1.3/Calm.nnwtheme.zip",
+          "release_notes": "Removes the top reading progress bar from reader views and bumps the internal theme version to 6."
+        },
+        {
+          "release": "v1.1.2",
+          "released_at": "2026-06-05T23:41:59Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.1.2/Calm.nnwtheme.zip",
+          "release_notes": "Hybrid section rail behavior: articles with five or more filtered headings use heading markers; articles with four or fewer use five scroll-depth markers. Keeps marker clicks inside the reader view with top breathing room."
+        },
+        {
+          "release": "v1.1.1",
+          "released_at": "2026-06-05T23:14:15Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.1.1/Calm.nnwtheme.zip",
+          "release_notes": "## Changes\n- Updated the NetNewsWire installer author website to `https://raisul.xyz`.\n- Bumped the internal NetNewsWire theme version to `4`.\n\n## Validation\n- `plutil -lint Calm.nnwtheme/Info.plist`\n- embedded script syntax checks for `Calm.nnwtheme/template.html` and `preview/index.html`\n- release zip inspected to confirm `CreatorHomePage = https://raisul.xyz` and `Version = 4`"
+        },
+        {
+          "release": "v1.1.0",
+          "released_at": "2026-06-05T23:11:48Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.1.0/Calm.nnwtheme.zip",
+          "release_notes": "## Changes\n- Reworked the generated section rail into a lower-contrast marker stack for desktop and mobile.\n- Limited section markers to the article title and major body headings so lower-level subheads do not make the rail feel random.\n- Kept marker clicks inside the reader view and added scroll breathing room for section jumps.\n- Bumped the internal NetNewsWire theme version to `3`.\n\n## Validation\n- `plutil -lint Calm.nnwtheme/Info.plist`\n- embedded script syntax/contracts for `Calm.nnwtheme/template.html` and `preview/index.html`\n- release zip inspected to confirm `Info.plist` version `3`"
+        },
+        {
+          "release": "v1.0.1",
+          "released_at": "2026-05-18T19:03:19Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.0.1/Calm.nnwtheme.zip",
+          "release_notes": "Bumps the iOS article font by 1px while preserving NetNewsWire Dynamic Type sizing."
+        },
+        {
+          "release": "v1.0.0",
+          "released_at": "2026-05-18T04:19:50Z",
+          "asset_name": "Calm.nnwtheme.zip",
+          "asset_url": "https://github.com/raisulchowdhury/calm-nnwtheme/releases/download/v1.0.0/Calm.nnwtheme.zip",
+          "release_notes": "Initial Calm NetNewsWire theme for macOS and iOS."
+        }
+      ]
     },
     {
       "id": "com.ducmbui.themes.compakt",
@@ -75,11 +171,20 @@
       "released_at": "2026-04-17T09:15:58Z",
       "asset_name": "Compakt.nnwtheme.zip",
       "asset_url": "https://github.com/bmndc/Compakt.nnwtheme/releases/download/1.1/Compakt.nnwtheme.zip",
-      "downloads": 193,
-      "downloads_last_7_days": 171,
+      "downloads": 197,
+      "downloads_last_7_days": 175,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fbmndc%2FCompakt.nnwtheme%2Freleases%2Fdownload%2F1.1%2FCompakt.nnwtheme.zip",
       "screenshot_url": "https://raw.githubusercontent.com/bmndc/Compakt.nnwtheme/main/screenshot.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": [
+        {
+          "release": "1.0",
+          "released_at": "2026-01-28T19:27:21Z",
+          "asset_name": "Compakt.nnwtheme.zip",
+          "asset_url": "https://github.com/bmndc/Compakt.nnwtheme/releases/download/1.0/Compakt.nnwtheme.zip",
+          "release_notes": null
+        }
+      ]
     },
     {
       "id": "me.mikeschreiber.nnwthemes.default-serif",
@@ -95,11 +200,12 @@
       "released_at": "2024-11-15T05:02:23Z",
       "asset_name": "Default-Serif.nnwtheme.zip",
       "asset_url": "https://github.com/mischreiber/nnw-themes/releases/download/v0.1/Default-Serif.nnwtheme.zip",
-      "downloads": 629,
-      "downloads_last_7_days": 141,
+      "downloads": 632,
+      "downloads_last_7_days": 144,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fmischreiber%2Fnnw-themes%2Freleases%2Fdownload%2Fv0.1%2FDefault-Serif.nnwtheme.zip",
       "screenshot_url": "https://raw.githubusercontent.com/mischreiber/nnw-themes/refs/tags/v0.1/images/Default-Serif-light.png",
-      "release_notes": "* Initial repo upload\n* Adding `Default-Serif` theme\n\n**Full Changelog**: https://github.com/mischreiber/nnw-themes/commits/v0.1"
+      "release_notes": "* Initial repo upload\n* Adding `Default-Serif` theme\n\n**Full Changelog**: https://github.com/mischreiber/nnw-themes/commits/v0.1",
+      "release_history": []
     },
     {
       "id": "com.52chinaweb.themes.elegant",
@@ -115,11 +221,48 @@
       "released_at": "2025-04-08T03:58:03Z",
       "asset_name": "Elegant.nnwtheme.zip",
       "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.16/Elegant.nnwtheme.zip",
-      "downloads": 1245,
-      "downloads_last_7_days": 252,
+      "downloads": 1254,
+      "downloads_last_7_days": 261,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FChangJun2019%2Felegant-nnw%2Freleases%2Fdownload%2Fv0.1.16%2FElegant.nnwtheme.zip",
       "screenshot_url": "https://raw.githubusercontent.com/ChangJun2019/elegant-nnw/main/screenshots/elegant-theme-light.png",
-      "release_notes": "*No significant changes*\n\n##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/v0.1.15...v0.1.16)"
+      "release_notes": "*No significant changes*\n\n##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/v0.1.15...v0.1.16)",
+      "release_history": [
+        {
+          "release": "v0.1.10",
+          "released_at": "2023-10-15T13:41:20Z",
+          "asset_name": "Elegant.nnwtheme.zip",
+          "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.10/Elegant.nnwtheme.zip",
+          "release_notes": "### &nbsp;&nbsp;&nbsp;🚀 Features\n\n- Remove font &nbsp;-&nbsp; by @ChangJun2019 [<samp>(44226)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/442268d)\n- Nr build &nbsp;-&nbsp; by @ChangJun2019 [<samp>(ccd17)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/ccd172e)\n\n##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/v0.1.9...v0.1.10)"
+        },
+        {
+          "release": "v0.1.9",
+          "released_at": "2023-08-10T02:31:49Z",
+          "asset_name": "Elegant.nnwtheme.zip",
+          "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.9/Elegant.nnwtheme.zip",
+          "release_notes": "### 🚀 Features\n\n- Avatar bg color - by **changjun** [<samp>(ec087)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/ec0879a)\n- A hover style - by **changjun** [<samp>(09902)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/099026b)\n- Img style - by **changjun** [<samp>(a689b)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/a689b96)\n- Font set - by **changjun** [<samp>(1d101)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/1d1019a)\n\n### 🐞 Bug Fixes\n\n- Table tr background color - by **changjun** [<samp>(7d0d2)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/7d0d2d9)\n\n##### [View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/v0.1.6...v0.1.9)"
+        },
+        {
+          "release": "v0.1.5",
+          "released_at": "2023-05-15T17:16:26Z",
+          "asset_name": "Elegant.nnwtheme.zip",
+          "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.5/Elegant.nnwtheme.zip",
+          "release_notes": "*No significant changes*\n\n##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/v0.1.4...v0.1.5)"
+        },
+        {
+          "release": "v0.1.3",
+          "released_at": "2023-05-15T14:57:29Z",
+          "asset_name": "Elegant.nnwtheme.zip",
+          "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.3/Elegant.nnwtheme.zip",
+          "release_notes": "### &nbsp;&nbsp;&nbsp;🚀 Features\n\n- Posted on time &nbsp;-&nbsp; by @ChangJun2019 [<samp>(b2c28)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/b2c28b2)\n\n##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/v0.1.2...v0.1.3)"
+        },
+        {
+          "release": "v0.1.2",
+          "released_at": "2023-05-14T15:47:45Z",
+          "asset_name": "Elegant.nnwtheme.zip",
+          "asset_url": "https://github.com/ChangJun2019/elegant-nnw/releases/download/v0.1.2/Elegant.nnwtheme.zip",
+          "release_notes": "### &nbsp;&nbsp;&nbsp;🚀 Features\n\n- Basic setup &nbsp;-&nbsp; by @ChangJun2019 [<samp>(6fab4)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/6fab4e9)\n- Basic setup &nbsp;-&nbsp; by @ChangJun2019 [<samp>(e82e8)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/e82e8f7)\n- Head style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(748bb)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/748bb50)\n- Footer style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(e7acd)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/e7acd9e)\n- Font size change &nbsp;-&nbsp; by @ChangJun2019 [<samp>(17210)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/1721016)\n- Update style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(b4924)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/b492438)\n- Update style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(c19c2)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/c19c2bd)\n- Font setting &nbsp;-&nbsp; by @ChangJun2019 [<samp>(4f26f)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/4f26f9f)\n- Update style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(f4310)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/f4310a4)\n- Update style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(80595)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/8059563)\n- Update style &nbsp;-&nbsp; by @ChangJun2019 [<samp>(b2205)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/b220576)\n- Font setting &nbsp;-&nbsp; by @ChangJun2019 [<samp>(8a268)</samp>](https://github.com/ChangJun2019/elegant-nnw/commit/8a268fd)\n\n##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/ChangJun2019/elegant-nnw/compare/15178686e43a8bfbd2019924f3b5043a0bfd385a...v0.1.2)"
+        }
+      ]
     },
     {
       "id": "org.marquard.nnwtheme.ember",
@@ -135,11 +278,83 @@
       "released_at": "2026-09-24T03:31:26Z",
       "asset_name": "Ember.nnwtheme.zip",
       "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v2.4/Ember.nnwtheme.zip",
-      "downloads": 760,
-      "downloads_last_7_days": 532,
+      "downloads": 776,
+      "downloads_last_7_days": 548,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fdave-atx%2Fember-nnw-theme%2Freleases%2Fdownload%2Fv2.4%2FEmber.nnwtheme.zip",
       "screenshot_url": "https://raw.githubusercontent.com/dave-atx/ember-nnw-theme/main/screenshots/theme-preview.png",
-      "release_notes": "## 2.4 — 2026-09-24\n\n### Bug Fixes\n- Wrap the opening paragraph under a feed-floated icon"
+      "release_notes": "## 2.4 — 2026-09-24\n\n### Bug Fixes\n- Wrap the opening paragraph under a feed-floated icon",
+      "release_history": [
+        {
+          "release": "v2.3",
+          "released_at": "2026-09-23T21:53:36Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v2.3/Ember.nnwtheme.zip",
+          "release_notes": "## 2.3 — 2026-09-23\n\n### Bug Fixes\n- Keep feed-sized and floated images inside the article column\n\n### Build\n- Move the tooling to the nnw-theme npm package"
+        },
+        {
+          "release": "v2.2",
+          "released_at": "2026-09-22T06:24:00Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v2.2/Ember.nnwtheme.zip",
+          "release_notes": "## 2.2 — 2026-09-22\n\n### Bug Fixes\n- Apply the Extra Large and XX Large text sizes on macOS\n- Keep full-bleed linked images inside the viewport on iPhone\n- Keep footnote markers on the line of the word they annotate\n\n### Build\n- Adopt the netnewswire-theme-template tooling (v1.0.0)\n- Update the template tooling to v1.0.1\n- Update the template tooling to v1.0.2\n- Update the template tooling to v1.0.3\n\n### Documentation\n- Describe the template tooling in the README\n- Add the marketplace preview image\n\n### Refactor\n- Detect the platform from the text-size class, not @supports\n\n### Testing\n- Move fixtures to fixtures/ and declare footnote expectations\n- Require footnote markers to stay with their word"
+        },
+        {
+          "release": "v2.1",
+          "released_at": "2026-09-10T22:32:34Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v2.1/Ember.nnwtheme.zip",
+          "release_notes": "## 2.1 — 2026-09-10\n\n### Bug Fixes\n- Give footnote markers one presentation across providers\n\n### Documentation\n- Document the footnote uniformity checks\n\n### Testing\n- Assert marker uniformity against a real captured article"
+        },
+        {
+          "release": "v2.0",
+          "released_at": "2026-09-10T20:53:11Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v2.0/Ember.nnwtheme.zip",
+          "release_notes": "## 2.0 — 2026-09-10\n\n### Bug Fixes\n- Keep nested footnote numerals legible inside the marker\n- Avoid duplicate ids when cloning footnote content\n\n### Documentation\n- Added webp screenshot variants to save space\n- Add a footnote callout to the site feature grid\n- Document the release process and its two version numbers\n\n### Features\n- Support additional footnote formats\n\n### Testing\n- Assert footnote provider coverage in the rendered preview\n- Add an inline image fixture"
+        },
+        {
+          "release": "v1.5",
+          "released_at": "2026-07-10T07:04:25Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v1.5/Ember.nnwtheme.zip",
+          "release_notes": "## 1.5 — 2026-07-10\n\n### Bug Fixes\n- Keep code blocks aligned and clear of the opening drop cap\n\n### Features\n- Show latest release version and date under hero CTA\n\n### Testing\n- Add Substack-style footnote fixture\n- Add pre/code and pre/table layout fixtures"
+        },
+        {
+          "release": "v1.4",
+          "released_at": "2026-07-09T21:01:12Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v1.4/Ember.nnwtheme.zip",
+          "release_notes": "**Full Changelog**: https://github.com/dave-atx/ember-nnw-theme/compare/v1.3...v1.4"
+        },
+        {
+          "release": "v1.3",
+          "released_at": "2026-07-09T20:18:52Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v1.3/Ember.nnwtheme.zip",
+          "release_notes": "**Full Changelog**: https://github.com/dave-atx/ember-nnw-theme/compare/v1.0...v1.3"
+        },
+        {
+          "release": "v1.2",
+          "released_at": "2026-07-09T19:47:32Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v1.2/Ember.nnwtheme.zip",
+          "release_notes": "**Full Changelog**: https://github.com/dave-atx/ember-nnw-theme/compare/v1.0...v1.2"
+        },
+        {
+          "release": "v1.1",
+          "released_at": "2026-07-09T16:26:26Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v1.1/Ember.nnwtheme.zip",
+          "release_notes": "**Full Changelog**: https://github.com/dave-atx/ember-nnw-theme/compare/v1.0...v1.1"
+        },
+        {
+          "release": "v1.0",
+          "released_at": "2026-07-09T06:12:32Z",
+          "asset_name": "Ember.nnwtheme.zip",
+          "asset_url": "https://github.com/dave-atx/ember-nnw-theme/releases/download/v1.0/Ember.nnwtheme.zip",
+          "release_notes": "**Full Changelog**: https://github.com/dave-atx/ember-nnw-theme/commits/v1.0"
+        }
+      ]
     },
     {
       "id": "net.stuartbreckenridge.themes.financial-broadsheet",
@@ -159,7 +374,8 @@
       "downloads_last_7_days": null,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fstuartbreckenridge%2FNNWThemesFinancialBroadsheet%2Farchive%2Frefs%2Ftags%2F1.zip",
       "screenshot_url": "https://stuartbreckenridge.net/_astro/FinBroadSheet-Dark.D5k0JN0e_QgDT9.webp",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "com.github.frznv.NetNewsWire-Flexoki",
@@ -175,11 +391,12 @@
       "released_at": "2025-04-26T14:21:20Z",
       "asset_name": "Flexoki.nnwtheme.zip",
       "asset_url": "https://github.com/frznv/NetNewsWire-Flexoki/releases/download/v1/Flexoki.nnwtheme.zip",
-      "downloads": 276,
-      "downloads_last_7_days": 172,
+      "downloads": 279,
+      "downloads_last_7_days": 175,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Ffrznv%2FNetNewsWire-Flexoki%2Freleases%2Fdownload%2Fv1%2FFlexoki.nnwtheme.zip",
       "screenshot_url": null,
-      "release_notes": "Initial release of NNW Flexoki Theme."
+      "release_notes": "Initial release of NNW Flexoki Theme.",
+      "release_history": []
     },
     {
       "id": "com.joodaloop.themes.manu",
@@ -195,11 +412,12 @@
       "released_at": "2024-05-19T13:18:35Z",
       "asset_name": "Manu.nnwtheme.zip",
       "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/Manu.nnwtheme.zip",
-      "downloads": 1300,
-      "downloads_last_7_days": 223,
+      "downloads": 1304,
+      "downloads_last_7_days": 227,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2FManu.nnwtheme.zip",
       "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/manu-light.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "net.stuartbreckenridge.matrix",
@@ -219,7 +437,16 @@
       "downloads_last_7_days": null,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fstuartbreckenridge%2FNNWMatrix%2Farchive%2Frefs%2Ftags%2Fv1.0.2.zip",
       "screenshot_url": "https://stuartbreckenridge.net/_astro/Simulator-Screenshot---iPad-Pro-13-inch--M5----2026-02-23-at-21.04.01-1.DDXBul2b_Z2db6j3.webp",
-      "release_notes": null
+      "release_notes": "Adds typewriter effect to titles",
+      "release_history": [
+        {
+          "release": "v1.0.0",
+          "released_at": "2026-02-23T10:55:24Z",
+          "asset_name": "NNWMatrix-v1.0.0.zip",
+          "asset_url": "https://github.com/stuartbreckenridge/NNWMatrix/archive/refs/tags/v1.0.0.zip",
+          "release_notes": "Initial release"
+        }
+      ]
     },
     {
       "id": "com.tw93.themes.miaoyan",
@@ -235,11 +462,20 @@
       "released_at": "2025-11-23T01:56:20Z",
       "asset_name": "MiaoYan.nnwtheme.zip",
       "asset_url": "https://github.com/tw93/MiaoYan-NetNewsWire-Theme/releases/download/V1.1.1/MiaoYan.nnwtheme.zip",
-      "downloads": 742,
-      "downloads_last_7_days": 131,
+      "downloads": 748,
+      "downloads_last_7_days": 137,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Ftw93%2FMiaoYan-NetNewsWire-Theme%2Freleases%2Fdownload%2FV1.1.1%2FMiaoYan.nnwtheme.zip",
       "screenshot_url": "https://cdn.tw93.fun/pic/DnMetl.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": [
+        {
+          "release": "V1.0.1",
+          "released_at": "2025-11-02T12:16:49Z",
+          "asset_name": "MiaoYan.nnwtheme.zip",
+          "asset_url": "https://github.com/tw93/MiaoYan-NetNewsWire-Theme/releases/download/V1.0.1/MiaoYan.nnwtheme.zip",
+          "release_notes": "The first version, go and play. I hope you are happy."
+        }
+      ]
     },
     {
       "id": "com.lkhrs.themes.minutes",
@@ -259,7 +495,8 @@
       "downloads_last_7_days": null,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Flkhrs%2Fnnw-minutes%2Farchive%2Frefs%2Ftags%2F1.zip",
       "screenshot_url": "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/minutes/mac-white.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "net.stuartbreckenridge.padd",
@@ -279,7 +516,16 @@
       "downloads_last_7_days": null,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2Fstuartbreckenridge%2FNNWThemePADD%2Farchive%2Frefs%2Ftags%2Fv1.0.1.zip",
       "screenshot_url": "https://stuartbreckenridge.net/_astro/Dropped-Screenshot.RuXlAo9m_ZbUGJ5.webp",
-      "release_notes": null
+      "release_notes": "**Full Changelog**: https://github.com/stuartbreckenridge/NNWThemePADD/compare/v1.0...v1.0.1",
+      "release_history": [
+        {
+          "release": "v1.0",
+          "released_at": "2025-08-22T00:34:36Z",
+          "asset_name": "NNWThemePADD-v1.0.zip",
+          "asset_url": "https://github.com/stuartbreckenridge/NNWThemePADD/archive/refs/tags/v1.0.zip",
+          "release_notes": null
+        }
+      ]
     },
     {
       "id": "com.joodaloop.themes.royal",
@@ -295,11 +541,12 @@
       "released_at": "2024-05-19T13:18:35Z",
       "asset_name": "Royal.nnwtheme.zip",
       "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/Royal.nnwtheme.zip",
-      "downloads": 859,
-      "downloads_last_7_days": 135,
+      "downloads": 862,
+      "downloads_last_7_days": 138,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2FRoyal.nnwtheme.zip",
       "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/royal-light.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "com.jaysitter.themes.serifgazette",
@@ -315,11 +562,12 @@
       "released_at": "2024-05-19T15:21:34Z",
       "asset_name": "serif-gazette.nnwtheme.zip",
       "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.1.0/serif-gazette.nnwtheme.zip",
-      "downloads": 497,
-      "downloads_last_7_days": 143,
+      "downloads": 500,
+      "downloads_last_7_days": 146,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.1.0%2Fserif-gazette.nnwtheme.zip",
       "screenshot_url": "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/serif-gazette/mac-white.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "com.joodaloop.themes.slab",
@@ -335,11 +583,12 @@
       "released_at": "2024-05-19T13:18:35Z",
       "asset_name": "Slab.nnwtheme.zip",
       "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/Slab.nnwtheme.zip",
-      "downloads": 780,
-      "downloads_last_7_days": 171,
+      "downloads": 783,
+      "downloads_last_7_days": 174,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2FSlab.nnwtheme.zip",
       "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/slab-light.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     },
     {
       "id": "com.mynameisstuart.themes.system-ui",
@@ -355,11 +604,12 @@
       "released_at": "2024-05-19T13:18:35Z",
       "asset_name": "system-ui.nnwtheme.zip",
       "asset_url": "https://github.com/PaiJi/NetNewsWire-themes-collection/releases/download/1.0.0/system-ui.nnwtheme.zip",
-      "downloads": 2040,
-      "downloads_last_7_days": 407,
+      "downloads": 2045,
+      "downloads_last_7_days": 412,
       "install_url": "netnewswire://theme/add?url=https%3A%2F%2Fgithub.com%2FPaiJi%2FNetNewsWire-themes-collection%2Freleases%2Fdownload%2F1.0.0%2Fsystem-ui.nnwtheme.zip",
       "screenshot_url": "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/system-ui-lght.png",
-      "release_notes": null
+      "release_notes": null,
+      "release_history": []
     }
   ]
 }

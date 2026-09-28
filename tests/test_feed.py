@@ -89,5 +89,36 @@ class ReleaseNotesFeedTests(unittest.TestCase):
         self.assertNotIn("<h", self.render(None).split("Install ")[0])
 
 
+@unittest.skipUnless(HUGO, "hugo is not installed")
+class ReleaseHistoryFeedTests(unittest.TestCase):
+    """Earlier releases become their own items, keeping the id they had when current."""
+
+    def test_emits_an_item_per_earlier_release(self) -> None:
+        themes = json.loads((PROJECT_ROOT / "data" / "themes.json").read_text())
+        theme = themes["themes"][0]
+        theme["release_history"] = [
+            {
+                "release": "v0.9",
+                "released_at": "2001-01-01T00:00:00Z",
+                "asset_name": "Old.nnwtheme.zip",
+                "asset_url": "https://github.com/example/reader/old.zip",
+                "release_notes": "- The first cut",
+            }
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            public = Path(directory) / "public"
+            build_site(public, themes)
+            items = json.loads((public / "feed.json").read_text())["items"]
+        ids = [item["id"] for item in items]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn(theme["asset_url"], ids)
+        past = items[-1]
+        self.assertEqual(past["id"], "https://github.com/example/reader/old.zip")
+        self.assertEqual(past["title"], f"{theme['name']} v0.9")
+        self.assertEqual(past["date_published"], "2001-01-01T00:00:00Z")
+        self.assertIn("<li>The first cut</li>", past["content_html"])
+        self.assertEqual(past["attachments"][0]["title"], "Old.nnwtheme.zip")
+
+
 if __name__ == "__main__":
     unittest.main()

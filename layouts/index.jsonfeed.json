@@ -9,8 +9,31 @@
   "icon": {{ "feed-icon.png" | absURL | jsonify }},
   "favicon": {{ "feed-icon.png" | absURL | jsonify }},
   "items": [
-    {{- range $index, $theme := sort hugo.Data.themes.themes "released_at" "desc" }}
+    {{- /* One item per release: each theme's listed release plus the earlier
+           releases in its history. An item keeps the id it had while it was the
+           listed release, so readers do not see a duplicate once it is superseded. */}}
+    {{- $releases := slice }}
+    {{- range $theme := hugo.Data.themes.themes }}
+      {{- $releases = $releases | append (dict
+        "theme" $theme
+        "release" $theme.release
+        "released_at" $theme.released_at
+        "release_notes" $theme.release_notes
+        "asset_name" $theme.asset_name
+        "asset_url" $theme.asset_url) }}
+      {{- range $theme.release_history }}
+        {{- $releases = $releases | append (dict
+          "theme" $theme
+          "release" .release
+          "released_at" .released_at
+          "release_notes" .release_notes
+          "asset_name" .asset_name
+          "asset_url" .asset_url) }}
+      {{- end }}
+    {{- end }}
+    {{- range $index, $entry := sort $releases "released_at" "desc" }}
       {{- if $index }},{{ end }}
+      {{- $theme := $entry.theme }}
       {{- $description := $theme.description | htmlEscape }}
       {{- $name := $theme.name | htmlEscape }}
       {{- $installURL := printf "install/?theme=%s" ($theme.id | urlquery) | absURL | htmlEscape }}
@@ -18,9 +41,9 @@
       {{- /* feedContentModified stamps a change to this template, which alters every
              item's rendered content without changing its release date. Take the later
              of the two so an item is never modified before it was published. */}}
-      {{- $modified := $theme.released_at }}
+      {{- $modified := $entry.released_at }}
       {{- with site.Params.feedContentModified }}
-        {{- if gt (time.AsTime .) (time.AsTime $theme.released_at) }}
+        {{- if gt (time.AsTime .) (time.AsTime $entry.released_at) }}
           {{- $modified = . }}
         {{- end }}
       {{- end }}
@@ -31,18 +54,18 @@
       {{- /* Release notes are untrusted Markdown; Goldmark's unsafe mode stays off in
              hugo.toml so raw HTML and dangerous link schemes are dropped. */}}
       {{- $notes := "" }}
-      {{- with $theme.release_notes }}
+      {{- with $entry.release_notes }}
         {{- $notes = $.RenderString (dict "display" "block") . }}
       {{- end }}
       {{- $content := printf `%s<p>%s</p>%s<p><a href="%s">Install %s in NetNewsWire</a> · <a href="%s">View on GitHub</a></p>` $image $description $notes $installURL $name $repositoryURL }}
       {
-        "id": {{ $theme.asset_url | jsonify }},
+        "id": {{ $entry.asset_url | jsonify }},
         "url": {{ $theme.repository_url | jsonify }},
         "external_url": {{ $theme.creator_url | jsonify }},
-        "title": {{ printf "%s %s" $theme.name $theme.release | jsonify }},
+        "title": {{ printf "%s %s" $theme.name $entry.release | jsonify }},
         "summary": {{ $theme.description | jsonify }},
         "content_html": {{ $content | jsonify }},
-        "date_published": {{ $theme.released_at | jsonify }},
+        "date_published": {{ $entry.released_at | jsonify }},
         "date_modified": {{ $modified | jsonify }},
         {{- with $theme.screenshot_url }}
         "image": {{ . | jsonify }},
@@ -56,9 +79,9 @@
         "tags": ["NetNewsWire", "theme"],
         "attachments": [
           {
-            "url": {{ $theme.asset_url | jsonify }},
+            "url": {{ $entry.asset_url | jsonify }},
             "mime_type": "application/zip",
-            "title": {{ $theme.asset_name | jsonify }}
+            "title": {{ $entry.asset_name | jsonify }}
           }
         ],
         "_netnewswire": {

@@ -252,6 +252,117 @@ class ReleaseNotesTests(unittest.TestCase):
         self.assertEqual([theme.release_notes for theme in themes], [None])
 
 
+def release(tag: str, published_at: str, body: str | None, asset_id: int, **extra: Any) -> dict:
+    return {
+        "tag_name": tag,
+        "published_at": published_at,
+        "draft": False,
+        "prerelease": False,
+        "body": body,
+        "assets": [
+            {
+                "id": asset_id,
+                "name": "Reader.nnwtheme.zip",
+                "state": "uploaded",
+                "browser_download_url": f"https://github.com/example/reader/{tag}.zip",
+                "download_count": 1,
+            }
+        ],
+    } | extra
+
+
+class HistoryGitHub:
+    """Serves a repository with several releases, newest first, as GitHub does."""
+
+    def __init__(self, releases: list[dict[str, Any]], archives: dict[str, bytes]) -> None:
+        self.releases = releases
+        self.archives = archives
+
+    def json(self, path: str) -> Any:
+        if path.endswith("/releases/latest"):
+            return next(r for r in self.releases if not r["draft"] and not r["prerelease"])
+        if "/releases/tags/" in path:
+            tag = path.rsplit("/", 1)[-1]
+            return next(r for r in self.releases if r["tag_name"] == tag)
+        if "/releases?" in path:
+            return self.releases
+        if "/commits/" in path:
+            return {"commit": {"committer": {"date": "2026-08-31T00:00:00Z"}}}
+        if path == "/repos/example/reader":
+            return REPOSITORY | {"archived": False, "fork": False}
+        raise CatalogError(f"no fixture for {path}")
+
+    def bytes(self, url: str) -> bytes:
+        return self.archives.get(url, theme_archive())
+
+
+class ReleaseHistoryTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.releases = [
+            release("v4", "2026-09-04T00:00:00Z", "Beta", 4, prerelease=True),
+            release("v3", "2026-09-03T00:00:00Z", "- Latest", 3),
+            release("v2", "2026-09-02T00:00:00Z", "- Second", 2),
+            release("draft", "2026-09-02T12:00:00Z", "Unpublished", 9, draft=True),
+            release("v1", "2026-09-01T00:00:00Z", None, 1),
+            release("v0", "2026-08-01T00:00:00Z", "- Other theme", 0),
+        ]
+        other = plistlib.dumps(METADATA | {"ThemeIdentifier": "org.example.Other"})
+        self.archives = {
+            "https://github.com/example/reader/v0.zip": theme_archive(**{"Info.plist": other})
+        }
+
+    def test_discovered_theme_keeps_earlier_releases_newest_first(self) -> None:
+        github = HistoryGitHub(self.releases, self.archives)
+        themes, errors = index_repository(github, REPOSITORY, {})
+        self.assertEqual(errors, [])
+        [theme] = themes
+        self.assertEqual(theme.release, "v3")
+        self.assertEqual(
+            [(past.release, past.release_notes) for past in theme.release_history],
+            [("v2", "- Second"), ("v1", None)],
+        )
+        self.assertEqual(
+            theme.release_history[0].asset_url, "https://github.com/example/reader/v2.zip"
+        )
+
+    def test_curated_release_asset_keeps_earlier_releases(self) -> None:
+        item = {
+            "source_repository": "example/reader",
+            "package": {"kind": "release_asset", "tag": "v2", "asset": "Reader.nnwtheme.zip"},
+        }
+        themes, _ = index_curated_item(HistoryGitHub(self.releases, self.archives), item)
+        self.assertEqual([past.release for past in themes[0].release_history], ["v1"])
+
+    def test_curated_tag_archive_uses_its_release_notes_and_history(self) -> None:
+        item = {
+            "source_repository": "example/reader",
+            "package": {"kind": "tag_archive", "tag": "v2"},
+        }
+        themes, _ = index_curated_item(HistoryGitHub(self.releases, self.archives), item)
+        [theme] = themes
+        self.assertEqual(theme.release_notes, "- Second")
+        self.assertEqual(
+            [(past.release, past.asset_url) for past in theme.release_history],
+            [
+                ("v1", "https://github.com/example/reader/archive/refs/tags/v1.zip"),
+                ("v0", "https://github.com/example/reader/archive/refs/tags/v0.zip"),
+            ],
+        )
+
+    def test_curated_mirror_has_no_history(self) -> None:
+        item = {
+            "source_repository": "example/reader",
+            "package": {
+                "kind": "release_asset",
+                "repository": "example/collection",
+                "tag": "v2",
+                "asset": "Reader.nnwtheme.zip",
+            },
+        }
+        themes, _ = index_curated_item(HistoryGitHub(self.releases, self.archives), item)
+        self.assertEqual(themes[0].release_history, ())
+
+
 class CacheTests(unittest.TestCase):
     def test_missing_file_starts_cold(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
