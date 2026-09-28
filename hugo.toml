@@ -1,7 +1,7 @@
 baseURL = "https://dave-atx.github.io/nnw-theme-marketplace/"
 locale = "en-US"
 title = "NetNewsWire Themes"
-disableKinds = ["taxonomy", "term", "RSS", "sitemap", "robotsTXT", "404"]
+disableKinds = ["taxonomy", "term", "RSS", "robotsTXT", "404"]
 
 [mediaTypes."application/feed+json"]
 suffixes = ["json"]
@@ -16,5 +16,9 @@ notAlternative = false
 home = ["HTML", "JSONFeed"]
 
 [params]
-description = "Community-made themes for NetNewsWire."
+description = "Browse and install free, community-made themes for NetNewsWire on Mac, iPhone, and iPad. Compare screenshots, search by name, and install in one click."
+ogImageAlt = "NetNewsWire Themes: “Make your feeds feel like yours” beside three community themes shown in NetNewsWire."
 feedContentModified = "2026-09-17T05:35:00Z"
+
+[sitemap]
+changeFreq = "daily"

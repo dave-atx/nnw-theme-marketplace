@@ -1,7 +1,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="{{ .Description | default site.Params.description }}">
-<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
+{{ $title := cond .IsHome site.Title (printf "%s · %s" .Title site.Title) }}
+{{ $description := .Description | default site.Params.description }}
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $description }}">
+<link rel="canonical" href="{{ .Permalink }}">
+{{ if eq .Type "install" }}<meta name="robots" content="noindex">{{ end }}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:description" content="{{ $description }}">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="{{ "og-image.png" | absURL }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ site.Params.ogImageAlt }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $title }}">
+<meta name="twitter:description" content="{{ $description }}">
+<meta name="twitter:image" content="{{ "og-image.png" | absURL }}">
+<meta name="twitter:image:alt" content="{{ site.Params.ogImageAlt }}">
 <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
 <link rel="icon" href="{{ "feed-icon.png" | relURL }}" type="image/png">
 <link rel="alternate" href="{{ "feed.json" | absURL }}" type="application/feed+json" title="NetNewsWire Themes">
@@ -9,6 +28,7 @@
   <link rel="stylesheet" href="{{ .RelPermalink }}">
 {{ end }}
 {{ if .IsHome }}
+  {{ partial "jsonld.html" . }}
   {{ with resources.Get "js/site.js" | minify | fingerprint }}
     <script src="{{ .RelPermalink }}" defer></script>
   {{ end }}
