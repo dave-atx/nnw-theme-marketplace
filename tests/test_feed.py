@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 from typing import Any
 
+from test_seo import build_site
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 HUGO = shutil.which("hugo")
 
@@ -51,6 +53,40 @@ class FeedDateTests(unittest.TestCase):
             with self.subTest(stamp=stamp):
                 for item in build_feed(stamp):
                     self.assertGreaterEqual(item["date_modified"], item["date_published"])
+
+
+@unittest.skipUnless(HUGO, "hugo is not installed")
+class ReleaseNotesFeedTests(unittest.TestCase):
+    """Release notes render as Markdown, with untrusted HTML and links neutralized."""
+
+    def render(self, notes: str | None) -> str:
+        themes = json.loads((PROJECT_ROOT / "data" / "themes.json").read_text())
+        theme = themes["themes"][0]
+        theme["release_notes"] = notes
+        with tempfile.TemporaryDirectory() as directory:
+            public = Path(directory) / "public"
+            build_site(public, themes)
+            items = json.loads((public / "feed.json").read_text())["items"]
+        return next(item for item in items if item["id"] == theme["asset_url"])["content_html"]
+
+    def test_renders_markdown_notes_before_the_install_links(self) -> None:
+        content = self.render("### Bug Fixes\n- Wrap the opening paragraph")
+        self.assertIn("<h3", content)
+        self.assertIn("<li>Wrap the opening paragraph</li>", content)
+        self.assertLess(content.index("Wrap the opening"), content.index("Install "))
+
+    def test_drops_raw_html_and_script_links(self) -> None:
+        content = self.render(
+            '<script>alert(1)</script>\n\n<img src=x onerror="alert(2)">\n\n'
+            "[click](javascript:alert(3))"
+        )
+        self.assertNotIn("<script", content)
+        self.assertNotIn("onerror", content)
+        self.assertNotIn("javascript:", content)
+        self.assertIn("click", content)
+
+    def test_omits_notes_when_absent(self) -> None:
+        self.assertNotIn("<h", self.render(None).split("Install ")[0])
 
 
 if __name__ == "__main__":

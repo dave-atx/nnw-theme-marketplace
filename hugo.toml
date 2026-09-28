@@ -2,6 +2,9 @@ baseURL = "https://dave-atx.github.io/nnw-theme-marketplace/"
 locale = "en-US"
 title = "NetNewsWire Themes"
 disableKinds = ["taxonomy", "term", "RSS", "robotsTXT", "404"]
+# Theme release notes may contain raw HTML. Goldmark drops it on purpose, so a
+# theme's notes must not fail the warning-strict build.
+ignoreLogs = ["warning-goldmark-raw-html"]
 
 [mediaTypes."application/feed+json"]
 suffixes = ["json"]
@@ -18,7 +21,11 @@ home = ["HTML", "JSONFeed"]
 [params]
 description = "Browse and install free, community-made themes for NetNewsWire on Mac, iPhone, and iPad. Compare screenshots, search by name, and install in one click."
 ogImageAlt = "NetNewsWire Themes: “Make your feeds feel like yours” beside three community themes shown in NetNewsWire."
-feedContentModified = "2026-09-17T05:35:00Z"
+feedContentModified = "2026-09-28T02:35:00Z"
+
+# Theme release notes are untrusted Markdown rendered into the JSON Feed.
+[markup.goldmark.renderer]
+unsafe = false
 
 [sitemap]
 changeFreq = "daily"

@@ -37,6 +37,7 @@ RETRY_STATUSES = frozenset({500, 502, 503, 504})
 REQUEST_ATTEMPTS = 3
 RETRY_BACKOFF_SECONDS = 2.0
 MIN_CATALOG_RETENTION = 0.75
+MAX_RELEASE_NOTES_CHARS = 10_000
 
 
 class CatalogError(RuntimeError):
@@ -76,6 +77,7 @@ class Theme:
     downloads_last_7_days: int | None
     install_url: str
     screenshot_url: str | None
+    release_notes: str | None = None
 
 
 def _github_token() -> str | None:
@@ -311,6 +313,18 @@ def _readme_screenshot(github: GitHub, repository: dict[str, Any]) -> str | None
     return None
 
 
+def _release_notes(release: dict[str, Any]) -> str | None:
+    """Return a release's Markdown notes, trimmed to a bounded length, or None."""
+    body = release.get("body")
+    if not isinstance(body, str):
+        return None
+    notes = body.replace("\r\n", "\n").strip()
+    if len(notes) > MAX_RELEASE_NOTES_CHARS:
+        cut = notes.rfind("\n", 0, MAX_RELEASE_NOTES_CHARS)
+        notes = notes[: cut if cut > 0 else MAX_RELEASE_NOTES_CHARS].rstrip() + "\n\n…"
+    return notes or None
+
+
 def _install_url(asset_url: str) -> str:
     encoded = urllib.parse.quote(asset_url, safe="")
     return f"netnewswire://theme/add?url={encoded}"
@@ -326,6 +340,7 @@ def _theme_record(
     asset_url: str,
     downloads: int | None,
     screenshot_url: str | None,
+    release_notes: str | None = None,
     display: dict[str, Any] | None = None,
 ) -> Theme:
     display = display or {}
@@ -349,6 +364,7 @@ def _theme_record(
         downloads_last_7_days=None,
         install_url=_install_url(asset_url),
         screenshot_url=display.get("screenshot_url", screenshot_url),
+        release_notes=release_notes,
     )
 
 
@@ -379,6 +395,10 @@ def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme
         asset_url = asset["browser_download_url"]
         downloads: int | None = asset["download_count"]
         released_at = release["published_at"]
+        # A mirror's release describes the whole collection, not this theme.
+        release_notes = (
+            _release_notes(release) if package_repository == item["source_repository"] else None
+        )
     elif kind == "tag_archive":
         tag = package["tag"]
         commit = github.json(
@@ -391,6 +411,7 @@ def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme
         )
         downloads = None
         released_at = commit["commit"]["committer"]["date"]
+        release_notes = None
     else:
         raise CatalogError(f"unknown curated package kind: {kind}")
 
@@ -418,6 +439,7 @@ def index_curated_item(github: GitHub, item: dict[str, Any]) -> tuple[list[Theme
             asset_url=asset_url,
             downloads=downloads,
             screenshot_url=screenshot_url,
+            release_notes=release_notes,
             display=item.get("display"),
         )
         for metadata in metadata_items
@@ -503,6 +525,7 @@ def index_repository(
                     asset_url=asset["browser_download_url"],
                     downloads=downloads_by_theme.get(metadata["ThemeIdentifier"], 0),
                     screenshot_url=screenshot_url,
+                    release_notes=_release_notes(latest),
                 )
             )
         if not metadata_items:

@@ -13,13 +13,17 @@ from typing import Any
 from unittest import mock
 
 from marketplace.catalog import (
+    MAX_RELEASE_NOTES_CHARS,
     MAX_UNCOMPRESSED_BYTES,
     CatalogAborted,
     CatalogError,
     Theme,
+    _release_notes,
     _screenshot,
     apply_download_history,
     build_catalog,
+    index_curated_item,
+    index_repository,
     load_cache,
     themes_in_asset,
 )
@@ -158,6 +162,94 @@ class ScreenshotTests(unittest.TestCase):
     def test_missing_tree_and_readme_costs_only_the_screenshot(self) -> None:
         repository = {"full_name": "example/reader", "default_branch": "main"}
         self.assertIsNone(_screenshot(UnreachableGitHub(), repository))
+
+
+class ReleaseGitHub:
+    """Serves one repository whose latest release carries the given notes."""
+
+    def __init__(self, body: Any, package_repository: str = "example/reader") -> None:
+        self.release = {
+            "tag_name": "v2",
+            "published_at": "2026-09-01T00:00:00Z",
+            "draft": False,
+            "body": body,
+            "assets": [
+                {
+                    "id": 7,
+                    "name": "Reader.nnwtheme.zip",
+                    "state": "uploaded",
+                    "browser_download_url": f"https://github.com/{package_repository}/r.zip",
+                    "download_count": 5,
+                }
+            ],
+        }
+
+    def json(self, path: str) -> Any:
+        if path.endswith("/releases/latest") or "/releases/tags/" in path:
+            return self.release
+        if "/releases?" in path:
+            return [self.release]
+        if path == "/repos/example/reader":
+            return REPOSITORY | {"archived": False, "fork": False}
+        raise CatalogError(f"no fixture for {path}")
+
+    def bytes(self, url: str) -> bytes:
+        return theme_archive()
+
+
+REPOSITORY = {
+    "full_name": "example/reader",
+    "html_url": "https://github.com/example/reader",
+    "owner": {"html_url": "https://github.com/example"},
+    "stargazers_count": 1,
+    "default_branch": "main",
+}
+
+
+class ReleaseNotesTests(unittest.TestCase):
+    def test_normalizes_line_endings_and_whitespace(self) -> None:
+        notes = _release_notes({"body": "\r\n## What's Changed\r\n* Fix\r\n\r\n"})
+        self.assertEqual(notes, "## What's Changed\n* Fix")
+
+    def test_missing_or_blank_notes_are_none(self) -> None:
+        for body in (None, "", "  \r\n ", 42):
+            with self.subTest(body=body):
+                self.assertIsNone(_release_notes({"body": body}))
+        self.assertIsNone(_release_notes({}))
+
+    def test_truncates_long_notes_on_a_line_boundary(self) -> None:
+        line = "- " + "x" * 98
+        notes = _release_notes({"body": "\n".join([line] * 500)})
+        assert notes is not None
+        self.assertLessEqual(len(notes), MAX_RELEASE_NOTES_CHARS + 3)
+        self.assertTrue(notes.endswith(line + "\n\n…"))
+
+    def test_discovered_theme_carries_latest_release_notes(self) -> None:
+        themes, errors = index_repository(ReleaseGitHub("### Fixes\n- Wider"), REPOSITORY, {})
+        self.assertEqual(errors, [])
+        self.assertEqual([theme.release_notes for theme in themes], ["### Fixes\n- Wider"])
+
+    def test_curated_theme_from_its_own_repository_carries_notes(self) -> None:
+        item = {
+            "source_repository": "example/reader",
+            "package": {"kind": "release_asset", "tag": "v2", "asset": "Reader.nnwtheme.zip"},
+        }
+        themes, _ = index_curated_item(ReleaseGitHub("- Fix"), item)
+        self.assertEqual([theme.release_notes for theme in themes], ["- Fix"])
+
+    def test_curated_theme_from_a_mirror_omits_collection_notes(self) -> None:
+        item = {
+            "source_repository": "example/reader",
+            "package": {
+                "kind": "release_asset",
+                "repository": "example/collection",
+                "tag": "v2",
+                "asset": "Reader.nnwtheme.zip",
+            },
+        }
+        github = ReleaseGitHub("Adds twelve themes", package_repository="example/collection")
+        themes, _ = index_curated_item(github, item)
+        self.assertEqual([theme.release_notes for theme in themes], [None])
 
 
 class CacheTests(unittest.TestCase):

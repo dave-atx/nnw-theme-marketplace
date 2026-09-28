@@ -28,7 +28,13 @@
       {{- with $theme.screenshot_url }}
         {{- $image = printf `<p><img src="%s" alt="Preview of %s"></p>` (. | htmlEscape) $name }}
       {{- end }}
-      {{- $content := printf `%s<p>%s</p><p><a href="%s">Install %s in NetNewsWire</a> · <a href="%s">View on GitHub</a></p>` $image $description $installURL $name $repositoryURL }}
+      {{- /* Release notes are untrusted Markdown; Goldmark's unsafe mode stays off in
+             hugo.toml so raw HTML and dangerous link schemes are dropped. */}}
+      {{- $notes := "" }}
+      {{- with $theme.release_notes }}
+        {{- $notes = $.RenderString (dict "display" "block") . }}
+      {{- end }}
+      {{- $content := printf `%s<p>%s</p>%s<p><a href="%s">Install %s in NetNewsWire</a> · <a href="%s">View on GitHub</a></p>` $image $description $notes $installURL $name $repositoryURL }}
       {
         "id": {{ $theme.asset_url | jsonify }},
         "url": {{ $theme.repository_url | jsonify }},
