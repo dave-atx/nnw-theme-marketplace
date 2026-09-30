@@ -12,7 +12,6 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 HUGO = shutil.which("hugo")
 SITE = "https://dave-atx.github.io/nnw-theme-marketplace/"
-HOSTILE = '</script><script>alert("x")</script>'
 
 
 def build_site(destination: Path, themes: dict[str, Any] | None = None) -> None:
@@ -42,14 +41,12 @@ def build_site(destination: Path, themes: dict[str, Any] | None = None) -> None:
 
 
 class HeadParser(HTMLParser):
-    """Collect meta tags, the canonical link, and JSON-LD blocks from a page."""
+    """Collect meta tags and the canonical link from a page."""
 
     def __init__(self, html: str) -> None:
         super().__init__()
         self.meta: dict[str, str] = {}
         self.canonical: str | None = None
-        self.json_ld: list[str] = []
-        self._in_json_ld = False
         self.feed(html)
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -58,24 +55,6 @@ class HeadParser(HTMLParser):
             self.meta[values.get("property") or values["name"]] = values.get("content", "")
         elif tag == "link" and values.get("rel") == "canonical":
             self.canonical = values.get("href")
-        elif tag == "script" and values.get("type") == "application/ld+json":
-            self._in_json_ld = True
-            self.json_ld.append("")
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "script":
-            self._in_json_ld = False
-
-    def handle_data(self, data: str) -> None:
-        if self._in_json_ld:
-            self.json_ld[-1] += data
-
-
-def json_ld(html: str) -> dict[str, Any]:
-    blocks = HeadParser(html).json_ld
-    if len(blocks) != 1:
-        raise AssertionError(f"expected one JSON-LD block, found {len(blocks)}")
-    return json.loads(blocks[0])
 
 
 @unittest.skipUnless(HUGO, "hugo is not installed")
@@ -122,31 +101,9 @@ class SeoTests(unittest.TestCase):
         self.assertEqual(head.meta["og:url"], f"{SITE}get-listed/")
         self.assertEqual(head.meta["og:title"], "Get your theme listed · NetNewsWire Themes")
 
-    def test_json_ld_lists_every_theme(self) -> None:
-        themes = json.loads((PROJECT_ROOT / "data" / "themes.json").read_text())["themes"]
-        graph = json_ld(self.home)["@graph"]
-        items = graph[1]["mainEntity"]["itemListElement"]
-        self.assertEqual([item["item"]["name"] for item in items], [t["name"] for t in themes])
-        self.assertEqual([item["position"] for item in items], list(range(1, len(themes) + 1)))
+    def test_pages_have_no_structured_data(self) -> None:
+        self.assertNotIn("application/ld+json", self.home)
         self.assertNotIn("application/ld+json", self.install)
-
-    def test_json_ld_escapes_hostile_theme_fields(self) -> None:
-        themes = json.loads((PROJECT_ROOT / "data" / "themes.json").read_text())
-        theme = themes["themes"][0]
-        theme["name"] = HOSTILE
-        theme["description"] = HOSTILE
-        theme["creator_name"] = HOSTILE
-        with tempfile.TemporaryDirectory() as directory:
-            public = Path(directory) / "public"
-            build_site(public, themes)
-            html = (public / "index.html").read_text()
-        blocks = HeadParser(html).json_ld
-        self.assertEqual(len(blocks), 1)
-        self.assertNotIn("<", blocks[0])
-        work = json_ld(html)["@graph"][1]["mainEntity"]["itemListElement"][0]["item"]
-        self.assertEqual(work["name"], HOSTILE)
-        self.assertEqual(work["description"], HOSTILE)
-        self.assertEqual(work["author"]["name"], HOSTILE)
 
 
 if __name__ == "__main__":

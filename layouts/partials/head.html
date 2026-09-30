@@ -28,7 +28,6 @@
   <link rel="stylesheet" href="{{ .RelPermalink }}">
 {{ end }}
 {{ if .IsHome }}
-  {{ partial "jsonld.html" . }}
   {{ with resources.Get "js/site.js" | minify | fingerprint }}
     <script src="{{ .RelPermalink }}" defer></script>
   {{ end }}
