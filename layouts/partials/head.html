@@ -27,6 +27,9 @@
 {{ with resources.Get "css/site.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ .RelPermalink }}">
 {{ end }}
+{{ with resources.Get "js/local-time.js" | minify | fingerprint }}
+  <script src="{{ .RelPermalink }}" defer></script>
+{{ end }}
 {{ if .IsHome }}
   {{ with resources.Get "js/site.js" | minify | fingerprint }}
     <script src="{{ .RelPermalink }}" defer></script>
