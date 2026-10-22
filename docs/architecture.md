@@ -86,7 +86,9 @@ keeps an item from reporting a modification that precedes its publication.
 GitHub exposes current lifetime download totals only. Each UTC day, the first
 scheduled build stores the current numeric totals in the ignored history file.
 The generator compares current totals with the newest snapshot at least seven
-days old and clamps negative deltas to zero. It keeps 15 days of snapshots.
+days old and clamps negative deltas to zero. A theme missing from that snapshot
+counts from zero when its first release came after the snapshot was captured;
+otherwise its weekly value stays unknown. It keeps 15 days of snapshots.
 
 Actions cache entries are immutable, so the workflow uses a new key per UTC
 day and restores the newest prior key by prefix. Later builds on the same day

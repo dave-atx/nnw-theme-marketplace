@@ -7,6 +7,7 @@ import struct
 import tempfile
 import unittest
 import zipfile
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ from marketplace.catalog import (
     MAX_UNCOMPRESSED_BYTES,
     CatalogAborted,
     CatalogError,
+    PastRelease,
     Theme,
     _release_notes,
     _screenshot,
@@ -480,12 +482,52 @@ class DownloadHistoryTests(unittest.TestCase):
         self.assertIsNone(current[0].downloads_last_7_days)
         self.assertEqual(cache["snapshots"][0]["downloads"], {})
 
-    def test_reports_nothing_for_a_theme_absent_from_the_baseline(self) -> None:
+    def test_reports_nothing_for_an_older_theme_absent_from_the_baseline(self) -> None:
+        """A theme that only recently joined the catalog may have years of downloads."""
         cache: dict[str, Any] = {"snapshots": [], "assets": {}}
         apply_download_history([self.theme(100)], cache, datetime(2026, 1, 1, tzinfo=UTC))
         current = apply_download_history(
             [self.theme(50, "org.example.Newcomer")], cache, datetime(2026, 1, 8, tzinfo=UTC)
         )
+        self.assertIsNone(current[0].downloads_last_7_days)
+
+    def test_counts_every_download_of_a_theme_first_released_after_the_baseline(self) -> None:
+        cache: dict[str, Any] = {"snapshots": [], "assets": {}}
+        apply_download_history([self.theme(100)], cache, datetime(2026, 1, 1, tzinfo=UTC))
+        newcomer = replace(
+            self.theme(50, "org.example.Newcomer"),
+            release="v2",
+            released_at="2026-01-05T00:00:00Z",
+            release_history=(
+                PastRelease(
+                    release="v1",
+                    released_at="2026-01-02T00:00:00Z",
+                    asset_name="Newcomer.nnwtheme.zip",
+                    asset_url="https://example.org/Newcomer.nnwtheme.zip",
+                    release_notes=None,
+                ),
+            ),
+        )
+        current = apply_download_history([newcomer], cache, datetime(2026, 1, 8, tzinfo=UTC))
+        self.assertEqual(current[0].downloads_last_7_days, 50)
+
+    def test_reports_nothing_when_an_earlier_release_predates_the_baseline(self) -> None:
+        cache: dict[str, Any] = {"snapshots": [], "assets": {}}
+        apply_download_history([self.theme(100)], cache, datetime(2026, 1, 1, tzinfo=UTC))
+        returning = replace(
+            self.theme(50, "org.example.Returning"),
+            released_at="2026-01-05T00:00:00Z",
+            release_history=(
+                PastRelease(
+                    release="v0",
+                    released_at="2025-06-01T00:00:00Z",
+                    asset_name="Returning.nnwtheme.zip",
+                    asset_url="https://example.org/Returning.nnwtheme.zip",
+                    release_notes=None,
+                ),
+            ),
+        )
+        current = apply_download_history([returning], cache, datetime(2026, 1, 8, tzinfo=UTC))
         self.assertIsNone(current[0].downloads_last_7_days)
 
     def test_discards_snapshots_older_than_retention(self) -> None:

@@ -710,6 +710,11 @@ def _captured_at(snapshot: dict[str, Any]) -> datetime:
     return captured if captured.tzinfo else captured.replace(tzinfo=UTC)
 
 
+def _first_released_at(theme: Theme) -> datetime:
+    earlier = (past.released_at for past in theme.release_history)
+    return min(datetime.fromisoformat(released_at) for released_at in (theme.released_at, *earlier))
+
+
 def apply_download_history(
     themes: list[Theme], cache: dict[str, Any], now: datetime | None = None
 ) -> list[Theme]:
@@ -725,6 +730,11 @@ def apply_download_history(
         weekly_downloads = None
         if baseline is not None and theme.downloads is not None:
             previous = baseline.get("downloads", {}).get(theme.id)
+            # A theme first released after the baseline was captured had no
+            # downloads then. One released earlier but missing from the baseline
+            # has unknown prior downloads and stays unmeasured.
+            if previous is None and _first_released_at(theme) > _captured_at(baseline):
+                previous = 0
             if previous is not None:
                 weekly_downloads = max(0, theme.downloads - previous)
         measured.append(replace(theme, downloads_last_7_days=weekly_downloads))
