@@ -1,0 +1,10 @@
+{{- /* A theme's page lives at themes/<slug>/. The slug comes from the theme's
+       name; a name that urlizes to nothing or that another theme shares falls
+       back to the unique theme identifier. Names are untrusted, so both go
+       through urlize. */}}
+{{- $slug := .name | urlize }}
+{{- $shared := where hugo.Data.themes.themes "name" .name }}
+{{- if or (not $slug) (gt (len $shared) 1) }}
+  {{- $slug = .id | urlize }}
+{{- end }}
+{{- return $slug }}

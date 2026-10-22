@@ -19,7 +19,7 @@ notAlternative = false
 home = ["HTML", "JSONFeed"]
 
 [params]
-description = "Browse and install free, community-made themes for NetNewsWire on Mac, iPhone, and iPad. Compare screenshots, search by name, and install in one click."
+description = "Free, community-made themes for NetNewsWire on Mac, iPhone, and iPad, with screenshots and one-click install."
 ogImageAlt = "NetNewsWire Themes: “Make your feeds feel like yours” beside three community themes shown in NetNewsWire."
 feedContentModified = "2026-09-28T06:46:00Z"
 

@@ -60,7 +60,7 @@
       {{- $content := printf `%s<p>%s</p>%s<p><a href="%s">Install %s in NetNewsWire</a> · <a href="%s">View on GitHub</a></p>` $image $description $notes $installURL $name $repositoryURL }}
       {
         "id": {{ $entry.asset_url | jsonify }},
-        "url": {{ $theme.repository_url | jsonify }},
+        "url": {{ printf "themes/%s/" (partialCached "theme-slug.html" $theme $theme.id) | absURL | jsonify }},
         "external_url": {{ $theme.creator_url | jsonify }},
         "title": {{ printf "%s %s" $theme.name $entry.release | jsonify }},
         "summary": {{ $theme.description | jsonify }},

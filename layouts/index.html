@@ -8,7 +8,7 @@
 
     <main>
       <section class="hero">
-        <p class="eyebrow">A community catalog</p>
+        <p class="eyebrow">Community themes for NetNewsWire</p>
         <h1>Make your feeds<br><em>feel like yours.</em></h1>
         <p class="lede">Discover thoughtful, community-made themes for <a href="https://netnewswire.com/">NetNewsWire</a>. Install one in a click and get back to reading.</p>
         <a class="hero-create" href="https://github.com/dave-atx/netnewswire-theme-template" data-open-create>Create a theme <span aria-hidden="true">↗</span></a>
@@ -36,7 +36,7 @@
           </div>
           <div class="trending-grid">
             {{ range . }}
-              <a class="trend-card" href="#{{ .id | anchorize }}">
+              <a class="trend-card" href="{{ printf "themes/%s/" (partialCached "theme-slug.html" . .id) | relURL }}">
                 {{ with .screenshot_url }}<img src="{{ . }}" alt="" loading="lazy">{{ end }}
                 <span>
                   <strong>{{ .name }}</strong>
@@ -74,8 +74,8 @@
         </div>
 
         <aside class="disclosure" aria-label="Marketplace disclosure">
-          <strong>Community listings are not endorsements.</strong>
-          Inclusion is not an endorsement by NetNewsWire or this marketplace, and no theme has been security-reviewed. Review the source and author before installing.
+          <strong>Listings aren't endorsements.</strong>
+          Neither NetNewsWire nor this marketplace has reviewed these themes for security. Check the source and author before you install one.
         </aside>
 
         <div class="theme-grid" data-theme-grid>
@@ -100,7 +100,7 @@
               <div class="theme-body">
                 <div class="theme-title-row">
                   <div>
-                    <h3>{{ .name }}</h3>
+                    <h3><a href="{{ printf "themes/%s/" (partialCached "theme-slug.html" . .id) | relURL }}">{{ .name }}</a></h3>
                     <p>by <a href="{{ .author_github_url }}">{{ .creator_name }}</a></p>
                   </div>
                   <a class="install-button" href="{{ .install_url | safeURL }}">Install</a>
@@ -133,10 +133,30 @@
         <p class="empty-state" data-empty hidden>No themes match that search.</p>
       </section>
 
+      <section class="how-to" id="install" aria-labelledby="install-heading">
+        <p class="eyebrow">How to install a theme</p>
+        <h2 id="install-heading">Install in a click,<br>then pick it in Settings.</h2>
+        <ol class="how-to-steps">
+          <li>
+            <h3>Click Install</h3>
+            <p>Use the device that has <a href="https://netnewswire.com/">NetNewsWire</a>, on Mac, iPhone, or iPad. Your browser asks to open NetNewsWire; allow it.</p>
+          </li>
+          <li>
+            <h3>Confirm in NetNewsWire</h3>
+            <p>NetNewsWire downloads the theme and asks “Install theme?” with its name and author. Choose <strong>Install Theme</strong>.</p>
+          </li>
+          <li>
+            <h3>Switch to it</h3>
+            <p>Installing doesn't change your current theme. On Mac, open <strong>Settings → General → Article Theme</strong>. On iPhone and iPad, open <strong>Settings → Articles → Theme</strong>.</p>
+          </li>
+        </ol>
+        <p class="how-to-manual">Prefer to do it by hand? Download the theme's <code>.nnwtheme.zip</code> from its GitHub release, unzip it, and open the <code>.nnwtheme</code> file. NetNewsWire asks the same question.</p>
+      </section>
+
       <section class="about" id="about">
         <p class="eyebrow">Open by design</p>
         <h2>Made by readers,<br>shared on GitHub.</h2>
-        <p>This catalog indexes public repositories tagged for NetNewsWire, plus a small set of established collections, and validates every package. Listings are community-published and are not reviewed or endorsed by NetNewsWire.</p>
+        <p>The catalog lists public GitHub repositories tagged for NetNewsWire, plus a few established collections, and checks every package before it shows up here. It refreshes a few times a day.</p>
         <div class="about-actions">
           <a href="{{ "get-listed/" | relURL }}">Publish your theme <span aria-hidden="true">→</span></a>
           <a href="{{ "feed.json" | relURL }}" type="application/feed+json">Subscribe to the JSON Feed <span aria-hidden="true">↗</span></a>

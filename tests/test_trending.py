@@ -22,14 +22,15 @@ CATALOG: dict[str, Any] = json.loads((PROJECT_ROOT / "data" / "themes.json").rea
 
 
 class HomepageParser(HTMLParser):
-    """Collect the Trending section, its card links and names, and theme card anchors."""
+    """Collect the Trending section, its card links and names, and theme card page links."""
 
     def __init__(self) -> None:
         super().__init__()
         self.has_trending = False
         self.trending_links: list[str] = []
         self.trending_names: list[str] = []
-        self.card_ids: set[str] = set()
+        self.card_links: set[str] = set()
+        self._in_heading = False
         self._in_trend_card = False
         self._in_name = False
 
@@ -43,14 +44,18 @@ class HomepageParser(HTMLParser):
             self.trending_links.append(attributes.get("href") or "")
         elif tag == "strong" and self._in_trend_card:
             self._in_name = True
-        elif tag == "article" and "theme-card" in classes and attributes.get("id"):
-            self.card_ids.add(attributes["id"] or "")
+        elif tag == "h3":
+            self._in_heading = True
+        elif tag == "a" and self._in_heading:
+            self.card_links.add(attributes.get("href") or "")
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "a":
             self._in_trend_card = False
         elif tag == "strong":
             self._in_name = False
+        elif tag == "h3":
+            self._in_heading = False
 
     def handle_data(self, data: str) -> None:
         if self._in_name:
@@ -107,13 +112,13 @@ class TrendingSectionTests(unittest.TestCase):
         self.assertTrue(page.has_trending)
         self.assertEqual(page.trending_names, expected_names(SAMPLE_WEEKLY_DOWNLOADS))
 
-    def test_trending_cards_link_to_theme_cards(self) -> None:
+    def test_trending_cards_link_to_theme_pages(self) -> None:
         page = render_homepage(SAMPLE_WEEKLY_DOWNLOADS)
         self.assertEqual(len(page.trending_links), 3)
         for link in page.trending_links:
             with self.subTest(link=link):
-                self.assertTrue(link.startswith("#"))
-                self.assertIn(link.removeprefix("#"), page.card_ids)
+                self.assertRegex(link, r"^/nnw-theme-marketplace/themes/[^/]+/$")
+                self.assertIn(link, page.card_links)
 
     def test_shows_fewer_cards_when_fewer_themes_moved(self) -> None:
         counts = (0, 5)

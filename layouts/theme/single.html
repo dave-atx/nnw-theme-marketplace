@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {{ partial "head.html" . }}
+  </head>
+  <body>
+    {{ partial "header.html" . }}
+    {{ $theme := index (where hugo.Data.themes.themes "id" .Params.theme_id) 0 }}
+    <main class="theme-page">
+      <a class="back-link" href="{{ "" | relURL }}"><span aria-hidden="true">←</span> All themes</a>
+      <header class="theme-page-header">
+        <div>
+          <p class="eyebrow">A theme for NetNewsWire</p>
+          <h1>{{ $theme.name }}</h1>
+          <p class="theme-byline">by <a href="{{ $theme.author_github_url }}">{{ $theme.creator_name }}</a></p>
+        </div>
+        <a class="install-button theme-page-install" href="{{ $theme.install_url | safeURL }}">Install in NetNewsWire</a>
+      </header>
+
+      <div class="theme-page-preview">
+        {{ with $theme.screenshot_url }}
+          <img src="{{ . }}" alt="{{ $theme.name }} theme shown in NetNewsWire">
+        {{ else }}
+          <div class="preview-placeholder" aria-hidden="true">
+            <div class="mock-window">
+              <span></span><span></span><span></span>
+              <div class="mock-kicker"></div>
+              <div class="mock-title"></div>
+              <div class="mock-copy"></div>
+              <div class="mock-copy short"></div>
+            </div>
+          </div>
+        {{ end }}
+      </div>
+
+      <div class="theme-page-details">
+        <div class="theme-page-body">
+          <p class="theme-page-description">{{ $theme.description }}</p>
+
+          {{- /* Release notes are untrusted Markdown; Goldmark's unsafe mode stays off in
+                 hugo.toml so raw HTML and dangerous link schemes are dropped. */}}
+          <section class="release-notes" aria-labelledby="latest-release">
+            <h2 id="latest-release">What's new in {{ $theme.release }}</h2>
+            {{ with $theme.release_notes }}
+              {{ $.RenderString (dict "display" "block") . }}
+            {{ else }}
+              <p>This release has no notes.</p>
+            {{ end }}
+          </section>
+
+          {{ with $theme.release_history }}
+            <section class="release-history" aria-labelledby="earlier-releases">
+              <h2 id="earlier-releases">Earlier releases</h2>
+              {{ range . }}
+                <details>
+                  <summary><strong>{{ .release }}</strong> <time datetime="{{ .released_at }}">{{ time.Format "January 2, 2006" (time.AsTime .released_at) }}</time></summary>
+                  {{ with .release_notes }}
+                    {{ $.RenderString (dict "display" "block") . }}
+                  {{ else }}
+                    <p>This release has no notes.</p>
+                  {{ end }}
+                </details>
+              {{ end }}
+            </section>
+          {{ end }}
+        </div>
+
+        <aside class="theme-facts" aria-label="Theme details">
+          <dl>
+            <div><dt>Version</dt><dd>{{ $theme.release }}</dd></div>
+            <div><dt>Updated</dt><dd><time datetime="{{ $theme.released_at }}">{{ time.Format "January 2, 2006" (time.AsTime $theme.released_at) }}</time></dd></div>
+            <div><dt>Downloads</dt><dd>{{ if ne $theme.downloads nil }}{{ lang.FormatNumber 0 $theme.downloads }}{{ else }}Unavailable{{ end }}</dd></div>
+            <div><dt>GitHub stars</dt><dd>{{ lang.FormatNumber 0 $theme.stars }}</dd></div>
+          </dl>
+          <p class="theme-links">
+            <a href="{{ $theme.repository_url }}">Source on GitHub</a>
+            <a href="{{ $theme.creator_url }}">Theme home <span aria-hidden="true">↗</span></a>
+          </p>
+          <p class="theme-caution"><a href="{{ "#install" | relURL }}">How to install a theme</a></p>
+          <p class="theme-caution">Published by the community and not reviewed for security. Check the source and author before you install it.</p>
+        </aside>
+      </div>
+    </main>
+    {{ partial "footer.html" . }}
+  </body>
+</html>

@@ -30,7 +30,8 @@ serves only static output.
 | `assets/` | Hugo-managed CSS and JavaScript |
 | `static/` | Files copied directly to the published site, including feed and browser icons |
 | `content/` | Standalone documentation and install-route content |
-| `tests/` | Python archive-validation and trend-calculation tests, plus Hugo render tests for the feed and Trending section |
+| `content/themes/_content.gotmpl` | Content adapter that adds a page per catalog theme at `themes/<slug>/`; `layouts/partials/theme-slug.html` picks the slug from the name, falling back to the theme identifier for shared or empty names |
+| `tests/` | Python archive-validation and trend-calculation tests, plus Hugo render tests for the feed, Trending section, footer, and theme pages |
 | `.github/workflows/pages.yml` | CI, scheduled catalog refresh, and Pages deployment |
 
 ## Discovery and validation

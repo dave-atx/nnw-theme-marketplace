@@ -1,0 +1,10 @@
+{{- range hugo.Data.themes.themes }}
+  {{- $.AddPage (dict
+    "kind" "page"
+    "type" "theme"
+    "path" (partialCached "theme-slug.html" . .id)
+    "title" .name
+    "description" (printf "%s, a NetNewsWire theme by %s. %s" .name .creator_name .description)
+    "params" (dict "theme_id" .id)
+  ) }}
+{{- end }}
