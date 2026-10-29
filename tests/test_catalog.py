@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import io
 import json
 import plistlib
@@ -18,6 +19,7 @@ from marketplace.catalog import (
     MAX_UNCOMPRESSED_BYTES,
     CatalogAborted,
     CatalogError,
+    CatalogNotFound,
     PastRelease,
     Theme,
     _release_notes,
@@ -27,8 +29,10 @@ from marketplace.catalog import (
     index_curated_item,
     index_repository,
     load_cache,
+    load_galleries,
     themes_in_asset,
 )
+from marketplace.manifest import GalleryTheme, Package
 
 METADATA = {
     "ThemeIdentifier": "org.example.Reader",
@@ -193,7 +197,7 @@ class ReleaseGitHub:
             return [self.release]
         if path == "/repos/example/reader":
             return REPOSITORY | {"archived": False, "fork": False}
-        raise CatalogError(f"no fixture for {path}")
+        raise CatalogNotFound(f"no fixture for {path}")
 
     def bytes(self, url: str) -> bytes:
         return theme_archive()
@@ -232,23 +236,20 @@ class ReleaseNotesTests(unittest.TestCase):
         self.assertEqual([theme.release_notes for theme in themes], ["### Fixes\n- Wider"])
 
     def test_curated_theme_from_its_own_repository_carries_notes(self) -> None:
-        item = {
-            "source_repository": "example/reader",
-            "package": {"kind": "release_asset", "tag": "v2", "asset": "Reader.nnwtheme.zip"},
-        }
+        item = GalleryTheme(
+            id="org.example.Reader",
+            source="example/reader",
+            package=Package(tag="v2", asset="Reader.nnwtheme.zip"),
+        )
         themes, _ = index_curated_item(ReleaseGitHub("- Fix"), item)
         self.assertEqual([theme.release_notes for theme in themes], ["- Fix"])
 
     def test_curated_theme_from_a_mirror_omits_collection_notes(self) -> None:
-        item = {
-            "source_repository": "example/reader",
-            "package": {
-                "kind": "release_asset",
-                "repository": "example/collection",
-                "tag": "v2",
-                "asset": "Reader.nnwtheme.zip",
-            },
-        }
+        item = GalleryTheme(
+            id="org.example.Reader",
+            source="example/reader",
+            package=Package(tag="v2", asset="Reader.nnwtheme.zip", repository="example/collection"),
+        )
         github = ReleaseGitHub("Adds twelve themes", package_repository="example/collection")
         themes, _ = index_curated_item(github, item)
         self.assertEqual([theme.release_notes for theme in themes], [None])
@@ -292,7 +293,7 @@ class HistoryGitHub:
             return {"commit": {"committer": {"date": "2026-08-31T00:00:00Z"}}}
         if path == "/repos/example/reader":
             return REPOSITORY | {"archived": False, "fork": False}
-        raise CatalogError(f"no fixture for {path}")
+        raise CatalogNotFound(f"no fixture for {path}")
 
     def bytes(self, url: str) -> bytes:
         return self.archives.get(url, theme_archive())
@@ -328,18 +329,16 @@ class ReleaseHistoryTests(unittest.TestCase):
         )
 
     def test_curated_release_asset_keeps_earlier_releases(self) -> None:
-        item = {
-            "source_repository": "example/reader",
-            "package": {"kind": "release_asset", "tag": "v2", "asset": "Reader.nnwtheme.zip"},
-        }
+        item = GalleryTheme(
+            id="org.example.Reader",
+            source="example/reader",
+            package=Package(tag="v2", asset="Reader.nnwtheme.zip"),
+        )
         themes, _ = index_curated_item(HistoryGitHub(self.releases, self.archives), item)
         self.assertEqual([past.release for past in themes[0].release_history], ["v1"])
 
     def test_curated_tag_archive_uses_its_release_notes_and_history(self) -> None:
-        item = {
-            "source_repository": "example/reader",
-            "package": {"kind": "tag_archive", "tag": "v2"},
-        }
+        item = GalleryTheme(id="org.example.Reader", source="example/reader", package=Package("v2"))
         themes, _ = index_curated_item(HistoryGitHub(self.releases, self.archives), item)
         [theme] = themes
         self.assertEqual(theme.release_notes, "- Second")
@@ -352,15 +351,11 @@ class ReleaseHistoryTests(unittest.TestCase):
         )
 
     def test_curated_mirror_has_no_history(self) -> None:
-        item = {
-            "source_repository": "example/reader",
-            "package": {
-                "kind": "release_asset",
-                "repository": "example/collection",
-                "tag": "v2",
-                "asset": "Reader.nnwtheme.zip",
-            },
-        }
+        item = GalleryTheme(
+            id="org.example.Reader",
+            source="example/reader",
+            package=Package(tag="v2", asset="Reader.nnwtheme.zip", repository="example/collection"),
+        )
         themes, _ = index_curated_item(HistoryGitHub(self.releases, self.archives), item)
         self.assertEqual(themes[0].release_history, ())
 
@@ -396,11 +391,11 @@ class ShrinkGuardTests(unittest.TestCase):
         with (
             mock.patch("marketplace.catalog._github_token", return_value=None),
             mock.patch("marketplace.catalog.discover_repositories", return_value=[]),
-            mock.patch("marketplace.catalog.index_collections", return_value=([], [])),
+            mock.patch("marketplace.catalog.index_galleries", return_value=([], [])),
         ):
             return build_catalog(
                 output,
-                Path(directory) / "collections.json",
+                Path(directory) / "galleries",
                 Path(directory) / "cache.json",
                 **kwargs,
             )
@@ -554,3 +549,226 @@ class DownloadHistoryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def manifest_payload(text: str, kind: str = "file") -> dict[str, Any]:
+    return {"type": kind, "content": base64.b64encode(text.encode()).decode()}
+
+
+DAISY_MANIFEST = """
+version = 1
+
+[[theme]]
+id = "org.example.daisy"
+description = "The serif one."
+screenshot = "screenshots/daisy.png"
+
+[[theme]]
+id = "org.example.daisy-sans"
+name = "Daisy Sans (Beta)"
+description = "The sans one."
+screenshot = "screenshots/daisy-sans.png"
+"""
+
+
+class ManifestGitHub:
+    """Serves a repository whose latest release ships two themes in two ZIPs."""
+
+    def __init__(self, manifest: Any = None, tree: list[str] | None = None) -> None:
+        self.manifest = manifest
+        self.tree = (
+            ["screenshots/daisy.png", "screenshots/daisy-sans.png"] if tree is None else tree
+        )
+        self.requests: list[str] = []
+        self.release = {
+            "tag_name": "v1",
+            "published_at": "2026-09-01T00:00:00Z",
+            "draft": False,
+            "prerelease": False,
+            "body": None,
+            "assets": [
+                self.asset(1, "Daisy.nnwtheme.zip"),
+                self.asset(2, "Daisy.Sans.nnwtheme.zip"),
+            ],
+        }
+
+    @staticmethod
+    def asset(asset_id: int, name: str) -> dict[str, Any]:
+        return {
+            "id": asset_id,
+            "name": name,
+            "state": "uploaded",
+            "browser_download_url": f"https://github.com/example/daisy/{name}",
+            "download_count": asset_id,
+        }
+
+    def json(self, path: str) -> Any:
+        self.requests.append(path)
+        if path.endswith("/releases/latest"):
+            return self.release
+        if "/releases?" in path:
+            return [self.release]
+        if path == "/repos/example/daisy/contents/nnw-marketplace.toml?ref=v1":
+            if self.manifest is None:
+                raise CatalogNotFound(path)
+            return self.manifest
+        if path == "/repos/example/daisy/git/trees/v1?recursive=1":
+            return {"tree": [{"path": p, "type": "blob", "size": 10} for p in self.tree]}
+        if path == "/repos/example/daisy/git/trees/main?recursive=1":
+            return {"tree": [{"path": "docs/screenshot.png", "type": "blob", "size": 10}]}
+        raise CatalogNotFound(path)
+
+    def bytes(self, url: str) -> bytes:
+        if url.endswith("Sans.nnwtheme.zip"):
+            plist = plist_with(ThemeIdentifier="org.example.daisy-sans", Name="Daisy Sans")
+            return theme_archive("Daisy Sans.nnwtheme/", **{"Info.plist": plist})
+        plist = plist_with(ThemeIdentifier="org.example.daisy", Name="Daisy")
+        return theme_archive("Daisy.nnwtheme/", **{"Info.plist": plist})
+
+
+DAISY = REPOSITORY | {
+    "full_name": "example/daisy",
+    "html_url": "https://github.com/example/daisy",
+    "description": "Two editorial themes.",
+}
+RAW = "https://raw.githubusercontent.com/example/daisy"
+
+
+class HostedGalleryIndexTests(unittest.TestCase):
+    def index(self, github: ManifestGitHub) -> tuple[dict[str, Theme], list[str]]:
+        themes, errors = index_repository(github, DAISY, {})
+        return {theme.id: theme for theme in themes}, errors
+
+    def test_gives_each_theme_its_own_card_copy(self) -> None:
+        github = ManifestGitHub(manifest_payload(DAISY_MANIFEST))
+        themes, errors = self.index(github)
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            [(t.name, t.description, t.screenshot_url) for t in themes.values()],
+            [
+                ("Daisy", "The serif one.", f"{RAW}/refs/tags/v1/screenshots/daisy.png"),
+                (
+                    "Daisy Sans (Beta)",
+                    "The sans one.",
+                    f"{RAW}/refs/tags/v1/screenshots/daisy-sans.png",
+                ),
+            ],
+        )
+        self.assertEqual(themes["org.example.daisy-sans"].downloads, 2)
+        self.assertNotIn("/repos/example/daisy/git/trees/main?recursive=1", github.requests)
+
+    def test_without_a_manifest_themes_share_repository_defaults(self) -> None:
+        themes, errors = self.index(ManifestGitHub())
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            {(t.name, t.description, t.screenshot_url) for t in themes.values()},
+            {
+                (name, "Two editorial themes.", f"{RAW}/main/docs/screenshot.png")
+                for name in ("Daisy", "Daisy Sans")
+            },
+        )
+
+    def test_unmentioned_theme_keeps_repository_defaults(self) -> None:
+        manifest = 'version = 1\n[[theme]]\nid = "org.example.daisy"\ndescription = "Serif."'
+        themes, errors = self.index(ManifestGitHub(manifest_payload(manifest)))
+        self.assertEqual(errors, [])
+        self.assertEqual(themes["org.example.daisy"].description, "Serif.")
+        self.assertEqual(themes["org.example.daisy-sans"].description, "Two editorial themes.")
+        self.assertEqual(
+            themes["org.example.daisy"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
+        )
+
+    def test_invalid_manifest_falls_back_to_defaults(self) -> None:
+        for manifest in (
+            manifest_payload("version = 1\n[[theme]]\nid = 'org.example.daisy'\nsource = 'x/y'"),
+            manifest_payload("not toml ="),
+            manifest_payload(DAISY_MANIFEST, kind="symlink"),
+            [manifest_payload(DAISY_MANIFEST)],
+            {"type": "file"},
+        ):
+            with self.subTest(manifest=manifest):
+                themes, errors = self.index(ManifestGitHub(manifest))
+                self.assertEqual(len(themes), 2)
+                self.assertEqual(
+                    {t.description for t in themes.values()}, {"Two editorial themes."}
+                )
+                [error] = errors
+                self.assertTrue(error.startswith("nnw-marketplace.toml: "), error)
+
+    def test_cannot_add_a_theme_the_release_does_not_ship(self) -> None:
+        manifest = DAISY_MANIFEST + '\n[[theme]]\nid = "org.example.other"\ndescription = "x"\n'
+        themes, errors = self.index(ManifestGitHub(manifest_payload(manifest)))
+        self.assertEqual(sorted(themes), ["org.example.daisy", "org.example.daisy-sans"])
+        self.assertEqual(errors, ["nnw-marketplace.toml: org.example.other is not in release v1"])
+
+    def test_missing_screenshot_falls_back_to_repository_image(self) -> None:
+        github = ManifestGitHub(manifest_payload(DAISY_MANIFEST), tree=["screenshots/daisy.png"])
+        themes, errors = self.index(github)
+        self.assertEqual(
+            errors,
+            ["nnw-marketplace.toml: screenshot screenshots/daisy-sans.png is not in release v1"],
+        )
+        self.assertEqual(
+            themes["org.example.daisy-sans"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
+        )
+        self.assertEqual(themes["org.example.daisy-sans"].description, "The sans one.")
+
+
+class CuratedGalleryTests(unittest.TestCase):
+    def write(self, directory: str, name: str, identifier: str = "org.example.reader") -> None:
+        (Path(directory) / name).write_text(
+            'version = 1\n[gallery]\nname = "G"\nhomepage = "https://example.org"\n'
+            f'[[theme]]\nid = "{identifier}"\nsource = "example/reader"\n'
+            '[theme.package]\ntag = "v1"\n'
+        )
+
+    def test_repository_galleries_are_valid(self) -> None:
+        galleries = load_galleries(Path(__file__).parents[1] / "catalog" / "galleries")
+        self.assertGreater(len(galleries), 0)
+        for path, gallery in galleries:
+            with self.subTest(path=path.name):
+                self.assertTrue(gallery.themes)
+
+    def test_rejects_an_identifier_listed_by_two_galleries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            self.write(directory, "a.toml")
+            self.write(directory, "b.toml")
+            with self.assertRaisesRegex(CatalogAborted, "already listed"):
+                load_galleries(Path(directory))
+
+    def test_invalid_gallery_stops_the_build(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "broken.toml").write_text('version = 1\n[[theme]]\nid = "a"\n')
+            with self.assertRaisesRegex(CatalogAborted, "broken.toml"):
+                load_galleries(Path(directory))
+
+    def test_missing_directory_has_no_galleries(self) -> None:
+        self.assertEqual(load_galleries(Path("/nonexistent/galleries")), [])
+
+    def test_curated_entry_needs_its_identifier_in_the_package(self) -> None:
+        item = GalleryTheme(
+            id="org.example.Missing",
+            source="example/reader",
+            package=Package(tag="v2", asset="Reader.nnwtheme.zip"),
+        )
+        themes, errors = index_curated_item(ReleaseGitHub(None), item)
+        self.assertEqual(themes, [])
+        self.assertEqual(
+            errors,
+            ["Reader.nnwtheme.zip: no valid .nnwtheme package with identifier org.example.Missing"],
+        )
+
+    def test_curated_display_overrides_package_metadata(self) -> None:
+        item = GalleryTheme(
+            id="org.example.Reader",
+            name="Reader Deluxe",
+            description="Curated copy.",
+            screenshot="https://example.org/reader.png",
+            source="example/reader",
+            package=Package(tag="v2", asset="Reader.nnwtheme.zip"),
+        )
+        [theme], _ = index_curated_item(ReleaseGitHub(None), item)
+        self.assertEqual(
+            (theme.name, theme.description, theme.screenshot_url),
+            ("Reader Deluxe", "Curated copy.", "https://example.org/reader.png"),
+        )

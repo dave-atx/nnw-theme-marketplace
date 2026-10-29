@@ -6,7 +6,7 @@ The marketplace is a static Hugo site backed by a Python catalog generator.
 There is no application server or database.
 
 1. `marketplace.catalog` discovers GitHub repositories by topic and reads the
-   explicit collection manifest.
+   curated gallery files.
 2. It downloads candidate theme archives, validates their structure and plist
    metadata, enriches them with GitHub metadata, and writes `data/themes.json`.
 3. Hugo renders the home page, listing guide, install handoff page, and JSON
@@ -21,8 +21,9 @@ serves only static output.
 | Path | Purpose |
 | --- | --- |
 | `src/marketplace/catalog.py` | GitHub discovery, archive validation, metadata enrichment, and trend calculation |
+| `src/marketplace/manifest.py` | Parsing and validation for gallery manifests, hosted and curated |
 | `src/marketplace/preview.py` | Sample weekly downloads mounted over `data/` for Trending tests and local preview |
-| `catalog/collections.json` | Reviewed exceptions for established catalogs and tag-based themes |
+| `catalog/galleries/*.toml` | Reviewed exceptions for established galleries and tag-based themes, one gallery per file |
 | `catalog/` | Source-controlled catalog policy; runtime history must not be stored here |
 | `.cache/download-history.json` | Ignored build cache: rolling download snapshots plus the release-asset to theme-identifier map, restored through Actions cache |
 | `data/themes.json` | Generated Hugo input, kept in Git so Hugo can run without network access |
@@ -45,11 +46,16 @@ requires an uploaded filename ending in `.nnwtheme.zip`. Download totals scan
 all non-draft releases, including prereleases, and join valid assets by
 `ThemeIdentifier`.
 
-The collection manifest handles known sources that cannot satisfy automatic
-discovery. A manifest entry identifies its source repository and either:
+Curated gallery files handle known sources that cannot satisfy automatic
+discovery. Each entry names a theme identifier, its source repository, and
+either:
 
 - an exact release tag and asset, optionally hosted by a collection repository;
-- an exact GitHub tag archive.
+- an exact GitHub tag archive (an entry with no `asset`).
+
+The entry's identifier must be in the package. An invalid gallery file or an
+identifier listed twice aborts the build, because these files are our own
+reviewed policy.
 
 Both paths use the same archive validator. The validator limits compressed and
 expanded sizes, rejects path traversal and symbolic links, requires exact
@@ -60,9 +66,33 @@ case-sensitive filenames, and validates required plist values and types.
 Theme package metadata is authoritative for the theme identifier, name,
 creator, creator home page, and version. GitHub supplies the repository URL,
 owner profile, stars, release date, and download counts. Repository images and
-README images are inspected for a screenshot. Curated entries may override
+README images are inspected for a screenshot. Gallery manifests may override
 display names, descriptions, and screenshots without changing package
 identity.
+
+## Gallery manifests
+
+Hosted and curated galleries share one TOML format. A theme repository may
+commit `nnw-marketplace.toml` at its root; curated galleries live in
+`catalog/galleries/`. `marketplace.manifest` parses both, and the location sets
+what a file may do.
+
+| | Hosted `nnw-marketplace.toml` | Curated `catalog/galleries/*.toml` |
+| --- | --- | --- |
+| Trust | Untrusted repository content | Reviewed policy |
+| Read from | Contents API at the latest stable release's tag | This repository |
+| Themes | Only those the release already ships, matched by `id` | Any theme whose package validates |
+| `source`, `[theme.package]` | Rejected | Required |
+| `screenshot` | Repository-relative image path, checked against the tag's tree and served from `raw.githubusercontent.com/<repo>/refs/tags/<tag>/` | `https://` URL |
+| `[gallery]` | Optional | `name` and `homepage` required |
+| On error | Ignore the file, list with defaults, record a diagnostic | Abort the build |
+
+Both enforce a 16 KiB size limit before parsing, catch parser recursion,
+reject unknown keys, check every type, collapse whitespace in card copy, and
+cap names at 80 characters and descriptions at 300. Reading the hosted file at
+the release tag keeps card copy in step with the package that installs, and
+keeps unreleased edits off the site. It costs one contents request per
+discovered repository, plus a tree request when the file names screenshots.
 
 The JSON Feed embeds screenshots in each item's HTML. Its install link opens a
 same-site HTTP page because NetNewsWire does not consistently make custom URL

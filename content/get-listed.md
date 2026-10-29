@@ -60,10 +60,14 @@ Each new stable release should attach a fresh `*.nnwtheme.zip` asset. The card i
 
 A broken latest release removes the theme until a valid stable release is available, so test the ZIP before publishing it.
 
-## Curated collections
+## Several themes in one repository
 
-The marketplace also has a small, source-controlled collection manifest for established catalogs that can't meet the automatic rules. It currently covers the [PaiJi theme collection](https://paiji.github.io/NetNewsWire-themes-collection/) and themes from [Stuart Breckenridge's NetNewsWire theme page](https://stuartbreckenridge.net/projects/netnewswire-themes/).
+One theme per repository is simplest. If your themes need to stay together, attach each theme's ZIP to the same release. They all get listed, with separate pages and download counts. To give each one its own description and screenshot, see [List several themes from one repository]({{< relref "several-themes.md" >}}).
 
-Manifest entries still point to public, non-archived GitHub repositories and must pass the same package validation. They may use a release asset published by a collection repository or a GitHub tag archive. GitHub doesn't count downloads for tag archives, so those cards say “Downloads unavailable.”
+## Curated galleries
 
-The manifest records the source repository, exact release or tag, asset name where applicable, and optional display copy or screenshot. Every entry is a reviewed change to this repository, so each exception and the reason for it stay in the Git history.
+The marketplace also keeps a small set of reviewed gallery files for established catalogs that can't meet the automatic rules. They currently cover the [PaiJi theme collection](https://paiji.github.io/NetNewsWire-themes-collection/) and themes from [Stuart Breckenridge's NetNewsWire theme page](https://stuartbreckenridge.net/projects/netnewswire-themes/).
+
+These entries still point to public, non-archived GitHub repositories and must pass the same package validation. They may use a release asset published by a collection repository or a GitHub tag archive. GitHub doesn't count downloads for tag archives, so those cards say “Downloads unavailable.”
+
+Each gallery is a TOML file in [`catalog/galleries/`](https://github.com/dave-atx/nnw-theme-marketplace/tree/main/catalog/galleries). It uses the same format a repository can host for its own themes, plus a source repository and pinned release or tag for each entry. Every entry is a reviewed change to this repository, and a comment in the file records why it's an exception.

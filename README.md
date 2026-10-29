@@ -18,11 +18,14 @@ latest stable release contains a valid `*.nnwtheme.zip` asset. The indexer
 validates the archive and required `Info.plist`, `template.html`, and
 `stylesheet.css` files before publishing a listing.
 
-Established catalogs that do not follow that release convention can be
-declared in [`catalog/collections.json`](catalog/collections.json). Curated
-entries use the same package validation and can select either a release asset
-or a GitHub tag archive. See the site's
+A repository that releases several themes can add an `nnw-marketplace.toml`
+file to give each theme its own description and screenshot. Established
+galleries that do not follow the release convention are declared in the same
+TOML format under [`catalog/galleries/`](catalog/galleries). Curated entries use
+the same package validation and can select either a release asset or a GitHub
+tag archive. See the site's
 [listing guide](https://dave-atx.github.io/nnw-theme-marketplace/get-listed/)
+and [multi-theme guide](https://dave-atx.github.io/nnw-theme-marketplace/several-themes/)
 for complete requirements and metadata rules.
 
 Cards combine package metadata with GitHub repository details, stars, release
