@@ -17,7 +17,6 @@ from dataclasses import dataclass, replace
 from typing import Any
 
 HOSTED_FILENAME = "nnw-marketplace.toml"
-FORMAT_VERSION = 1
 MAX_MANIFEST_BYTES = 16 * 1024
 MAX_THEMES = 50
 MAX_NAME_CHARS = 80
@@ -27,7 +26,7 @@ IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 REPOSITORY_PATTERN = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?/[A-Za-z0-9._-]+")
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x1f\x7f]")
 
-TOP_LEVEL_KEYS = frozenset({"version", "theme"})
+TOP_LEVEL_KEYS = frozenset({"theme"})
 HOSTED_THEME_KEYS = frozenset({"id", "name", "description", "screenshot"})
 CURATED_THEME_KEYS = HOSTED_THEME_KEYS | {"source", "package"}
 PACKAGE_KEYS = frozenset({"repository", "tag", "asset"})
@@ -79,9 +78,6 @@ def parse_gallery(raw: bytes, *, curated: bool) -> tuple[GalleryTheme, ...]:
         raise ManifestError(f"is not valid TOML: {error}") from error
 
     _check_keys(document, TOP_LEVEL_KEYS, "top level")
-    version = document.get("version")
-    if type(version) is not int or version != FORMAT_VERSION:
-        raise ManifestError(f"version must be {FORMAT_VERSION}")
 
     entries = document.get("theme", [])
     if not isinstance(entries, list) or not all(isinstance(entry, dict) for entry in entries):

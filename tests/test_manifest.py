@@ -14,8 +14,6 @@ from marketplace.manifest import (
 )
 
 HOSTED = """
-version = 1
-
 [[theme]]
 id = "org.example.daisy"
 description = \"\"\"
@@ -30,8 +28,6 @@ name = "Daisy Sans"
 """
 
 CURATED = """
-version = 1
-
 [[theme]]
 id = "org.example.reader"
 source = "example/reader"
@@ -51,13 +47,12 @@ tag = "v1"
 """
 
 
-def hosted(body: str, version: int = 1) -> bytes:
-    return f"version = {version}\n{body}".encode()
+def hosted(body: str) -> bytes:
+    return body.encode()
 
 
 def curated(theme: str, package: str = 'tag = "v1"') -> bytes:
     return (
-        "version = 1\n"
         f'[[theme]]\nid = "org.example.reader"\nsource = "example/reader"\n{theme}\n'
         f"[theme.package]\n{package}\n"
     ).encode()
@@ -111,22 +106,20 @@ class ManifestValidationTests(unittest.TestCase):
             parse_gallery(raw, curated=False)
 
     def test_rejects_invalid_toml_and_encoding(self) -> None:
-        for raw in (b"version = ", b"version = 1\n[[theme]\n", b"\xff\xfe"):
+        for raw in (b"x = ", b"[[theme]\n", b"\xff\xfe"):
             with self.subTest(raw=raw), self.assertRaises(ManifestError):
                 parse_gallery(raw, curated=False)
 
     def test_survives_deep_nesting(self) -> None:
         """tomllib recurses per nesting level; a file under the size cap can still overflow."""
-        raw = b"version = 1\nx = " + b"[" * 8000 + b"]" * 8000
+        raw = b"x = " + b"[" * 8000 + b"]" * 8000
         self.assertLessEqual(len(raw), MAX_MANIFEST_BYTES)
         with self.assertRaisesRegex(ManifestError, "not valid TOML"):
             parse_gallery(raw, curated=False)
 
-    def test_requires_version_one(self) -> None:
-        body = '[[theme]]\nid = "org.example.a"'
-        for raw in (body.encode(), hosted(body, 2), hosted(body).replace(b"1", b"true", 1)):
-            with self.subTest(raw=raw), self.assertRaisesRegex(ManifestError, "version"):
-                parse_gallery(raw, curated=False)
+    def test_rejects_a_version_key(self) -> None:
+        with self.assertRaisesRegex(ManifestError, "unknown key version"):
+            parse_gallery(hosted('version = 1\n[[theme]]\nid = "org.example.a"'), curated=False)
 
     def test_rejects_unknown_keys_to_surface_typos(self) -> None:
         for body in (

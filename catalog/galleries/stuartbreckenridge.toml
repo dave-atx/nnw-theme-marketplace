@@ -5,8 +5,6 @@
 # GitHub's archive of a pinned tag. GitHub doesn't count downloads for those.
 # Bump a tag here when Stuart tags a new version.
 
-version = 1
-
 [[theme]]
 id = "net.stuartbreckenridge.matrix"
 source = "stuartbreckenridge/NNWMatrix"

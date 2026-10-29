@@ -4,8 +4,6 @@
 # release ZIP, so their entries install the ZIP PaiJi's mirror attaches to its
 # own release. Entries without a package repository install from the source.
 
-version = 1
-
 # joodaloop/NetNewsWire-themes has no releases; the mirror packages all four.
 [[theme]]
 id = "com.joodaloop.themes.manu"

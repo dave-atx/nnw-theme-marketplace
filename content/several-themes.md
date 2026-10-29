@@ -12,8 +12,6 @@ What they share by default is the repository's description and screenshot, so th
 ## Example
 
 ```toml
-version = 1
-
 [[theme]]
 id = "com.example.daisy"
 description = "An editorial serif theme with a cohesive house style."
@@ -34,7 +32,6 @@ The marketplace reads the file **as of your latest stable release's tag**, not f
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `version` | Yes | Always `1`. |
 | `[[theme]]` `id` | Yes | The theme's `ThemeIdentifier` from its `Info.plist`. |
 | `[[theme]]` `name` | No | The name shown on the card instead of the `Info.plist` `Name`. Up to 80 characters. |
 | `[[theme]]` `description` | No | The card description, instead of the repository description. Up to 300 characters. Line breaks and repeated spaces become single spaces. |

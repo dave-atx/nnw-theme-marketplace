@@ -564,8 +564,6 @@ def manifest_payload(text: str, kind: str = "file") -> dict[str, Any]:
 
 
 DAISY_MANIFEST = """
-version = 1
-
 [[theme]]
 id = "org.example.daisy"
 description = "The serif one."
@@ -689,7 +687,7 @@ class HostedGalleryIndexTests(unittest.TestCase):
         )
 
     def test_unmentioned_theme_keeps_repository_defaults(self) -> None:
-        manifest = 'version = 1\n[[theme]]\nid = "org.example.daisy"\ndescription = "Serif."'
+        manifest = '[[theme]]\nid = "org.example.daisy"\ndescription = "Serif."'
         themes, errors = self.index(ManifestGitHub(manifest_payload(manifest)))
         self.assertEqual(errors, [])
         self.assertEqual(themes["org.example.daisy"].description, "Serif.")
@@ -700,7 +698,7 @@ class HostedGalleryIndexTests(unittest.TestCase):
 
     def test_invalid_manifest_falls_back_to_defaults(self) -> None:
         for manifest in (
-            manifest_payload("version = 1\n[[theme]]\nid = 'org.example.daisy'\nsource = 'x/y'"),
+            manifest_payload("[[theme]]\nid = 'org.example.daisy'\nsource = 'x/y'"),
             manifest_payload("not toml ="),
             manifest_payload(DAISY_MANIFEST, kind="symlink"),
             [manifest_payload(DAISY_MANIFEST)],
@@ -792,7 +790,6 @@ class HostedGalleryIndexTests(unittest.TestCase):
 class CuratedGalleryTests(unittest.TestCase):
     def write(self, directory: str, name: str, identifier: str = "org.example.reader") -> None:
         (Path(directory) / name).write_text(
-            "version = 1\n"
             f'[[theme]]\nid = "{identifier}"\nsource = "example/reader"\n'
             '[theme.package]\ntag = "v1"\n'
         )
@@ -813,7 +810,7 @@ class CuratedGalleryTests(unittest.TestCase):
 
     def test_invalid_gallery_stops_the_build(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            (Path(directory) / "broken.toml").write_text('version = 1\n[[theme]]\nid = "a"\n')
+            (Path(directory) / "broken.toml").write_text('[[theme]]\nid = "a"\n')
             with self.assertRaisesRegex(CatalogAborted, "broken.toml"):
                 load_galleries(Path(directory))
 
@@ -874,7 +871,6 @@ class IndexGalleriesTests(unittest.TestCase):
     def test_indexes_every_entry_and_records_failures(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             (Path(directory) / "example.toml").write_text(
-                "version = 1\n"
                 '[[theme]]\nid = "org.example.Reader"\nsource = "example/reader"\n'
                 'screenshot = "https://example.org/reader.png"\n'
                 '[theme.package]\ntag = "v2"\nasset = "Reader.nnwtheme.zip"\n'
