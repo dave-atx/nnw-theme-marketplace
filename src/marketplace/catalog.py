@@ -21,6 +21,13 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from marketplace.manifest import (
+    HOSTED_FILENAME,
+    GalleryTheme,
+    ManifestError,
+    parse_gallery,
+)
+
 API_ROOT = "https://api.github.com"
 TOPICS = ("netnewswire", "netnewswire-theme")
 REQUIRED_FILES = ("Info.plist", "template.html", "stylesheet.css")
@@ -38,6 +45,7 @@ REQUEST_ATTEMPTS = 3
 RETRY_BACKOFF_SECONDS = 2.0
 MIN_CATALOG_RETENTION = 0.75
 MAX_RELEASE_NOTES_CHARS = 10_000
+MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024
 
 
 class CatalogError(RuntimeError):
@@ -280,7 +288,7 @@ def _screenshot(github: GitHub, repository: dict[str, Any]) -> str | None:
         lower = path.lower()
         if item.get("type") != "blob" or not lower.endswith((".png", ".jpg", ".jpeg", ".webp")):
             continue
-        if item.get("size", 0) > 5 * 1024 * 1024:
+        if item.get("size", 0) > MAX_SCREENSHOT_BYTES:
             continue
         score = 0
         if any(word in lower for word in ("screenshot", "preview", "demo")):
@@ -383,18 +391,17 @@ def _theme_record(
     screenshot_url: str | None,
     release_notes: str | None = None,
     release_history: tuple[PastRelease, ...] = (),
-    display: dict[str, Any] | None = None,
+    display: GalleryTheme | None = None,
 ) -> Theme:
-    display = display or {}
     return Theme(
         id=metadata["ThemeIdentifier"],
-        name=display.get("name", metadata["Name"]),
+        name=(display and display.name) or metadata["Name"],
         creator_name=metadata["CreatorName"],
         creator_url=metadata["CreatorHomePage"],
         author_github_url=repository["owner"]["html_url"],
         repository=repository["full_name"],
         repository_url=repository["html_url"],
-        description=display.get("description")
+        description=(display and display.description)
         or repository.get("description")
         or "A community NetNewsWire theme.",
         stars=repository["stargazers_count"],
@@ -405,7 +412,7 @@ def _theme_record(
         downloads=downloads,
         downloads_last_7_days=None,
         install_url=_install_url(asset_url),
-        screenshot_url=display.get("screenshot_url", screenshot_url),
+        screenshot_url=screenshot_url,
         release_notes=release_notes,
         release_history=release_history,
     )
@@ -413,7 +420,7 @@ def _theme_record(
 
 def _curated_history(
     github: GitHub,
-    item: dict[str, Any],
+    entry: GalleryTheme,
     *,
     tag: str,
     cutoff: str,
@@ -427,11 +434,11 @@ def _curated_history(
     for the theme like any other asset. A tag archive is GitHub's snapshot of the
     same repository, so its earlier tags are taken as earlier versions.
     """
-    package = item["package"]
-    if package.get("repository", item["source_repository"]) != item["source_repository"]:
+    assert entry.source is not None and entry.package is not None
+    if entry.package_repository != entry.source:
         return None, {}
     try:
-        releases = github.json(f"/repos/{item['source_repository']}/releases?per_page=100")
+        releases = github.json(f"/repos/{entry.source}/releases?per_page=100")
     except CatalogError:
         return None, {}
     current = next((release for release in releases if release["tag_name"] == tag), None)
@@ -442,18 +449,16 @@ def _curated_history(
     for release in releases:
         if not _is_earlier_release(release, tag, cutoff):
             continue
-        if package["kind"] == "tag_archive":
+        if entry.package.asset is None:
             quoted = urllib.parse.quote(release["tag_name"], safe="")
-            repository_name = item["source_repository"].rsplit("/", 1)[-1]
+            repository_name = entry.source.rsplit("/", 1)[-1]
             asset_name = f"{repository_name}-{release['tag_name']}.zip"
-            asset_url = (
-                f"https://github.com/{item['source_repository']}/archive/refs/tags/{quoted}.zip"
-            )
+            asset_url = f"https://github.com/{entry.source}/archive/refs/tags/{quoted}.zip"
             for identifier in identifiers:
                 history[identifier].append(_past_release(release, asset_name, asset_url))
             continue
         for asset in release["assets"]:
-            if asset["name"] != package["asset"]:
+            if asset["name"] != entry.package.asset:
                 continue
             contained = _asset_identifiers(github, asset, asset_themes)
             for identifier in identifiers:
@@ -465,111 +470,114 @@ def _curated_history(
 
 
 def index_curated_item(
-    github: GitHub, item: dict[str, Any], asset_themes: dict[str, list[str]] | None = None
+    github: GitHub, entry: GalleryTheme, asset_themes: dict[str, list[str]] | None = None
 ) -> tuple[list[Theme], list[str]]:
-    source_repository = github.json(f"/repos/{item['source_repository']}")
+    assert entry.source is not None and entry.package is not None
+    source_repository = github.json(f"/repos/{entry.source}")
     if source_repository["archived"]:
         return [], ["source repository is archived"]
     if source_repository["fork"]:
         return [], ["source repository is a fork"]
 
-    package = item["package"]
-    package_repository = package.get("repository", item["source_repository"])
-    kind = package["kind"]
-    if kind == "release_asset":
-        tag = package["tag"]
-        release = github.json(
-            f"/repos/{package_repository}/releases/tags/{urllib.parse.quote(tag, safe='')}"
-        )
+    package = entry.package
+    package_repository = entry.package_repository
+    tag = package.tag
+    quoted_tag = urllib.parse.quote(tag, safe="")
+    if package.asset is not None:
+        release = github.json(f"/repos/{package_repository}/releases/tags/{quoted_tag}")
         if release["draft"]:
             return [], ["configured release is a draft"]
         asset = next(
-            (asset for asset in release["assets"] if asset["name"] == package["asset"]),
+            (asset for asset in release["assets"] if asset["name"] == package.asset),
             None,
         )
         if asset is None:
-            return [], [f"release {tag} has no {package['asset']} asset"]
+            return [], [f"release {tag} has no {package.asset} asset"]
         asset_name = asset["name"]
         asset_url = asset["browser_download_url"]
         downloads: int | None = asset["download_count"]
         released_at = release["published_at"]
         # A mirror's release describes the whole collection, not this theme.
-        release_notes = (
-            _release_notes(release) if package_repository == item["source_repository"] else None
-        )
-    elif kind == "tag_archive":
-        tag = package["tag"]
-        commit = github.json(
-            f"/repos/{package_repository}/commits/{urllib.parse.quote(tag, safe='')}"
-        )
+        release_notes = _release_notes(release) if package_repository == entry.source else None
+    else:
+        commit = github.json(f"/repos/{package_repository}/commits/{quoted_tag}")
         asset_name = f"{package_repository.rsplit('/', 1)[-1]}-{tag}.zip"
-        asset_url = (
-            f"https://github.com/{package_repository}/archive/refs/tags/"
-            f"{urllib.parse.quote(tag, safe='')}.zip"
-        )
+        asset_url = f"https://github.com/{package_repository}/archive/refs/tags/{quoted_tag}.zip"
         downloads = None
         released_at = commit["commit"]["committer"]["date"]
         release_notes = None
-    else:
-        raise CatalogError(f"unknown curated package kind: {kind}")
 
-    metadata_items = themes_in_asset(github.bytes(asset_url), asset_name)
-    identifier = item.get("theme_identifier")
-    if identifier:
-        metadata_items = [
-            metadata for metadata in metadata_items if metadata["ThemeIdentifier"] == identifier
-        ]
-    if not metadata_items:
-        return [], [f"{asset_name}: no matching valid .nnwtheme package found"]
-    if len(metadata_items) > 1 and not identifier:
-        return [], [f"{asset_name}: contains multiple themes; theme_identifier is required"]
+    metadata = next(
+        (
+            metadata
+            for metadata in themes_in_asset(github.bytes(asset_url), asset_name)
+            if metadata["ThemeIdentifier"] == entry.id
+        ),
+        None,
+    )
+    if metadata is None:
+        return [], [f"{asset_name}: no valid .nnwtheme package with identifier {entry.id}"]
 
     current, history = _curated_history(
         github,
-        item,
+        entry,
         tag=tag,
         cutoff=released_at,
-        identifiers=[metadata["ThemeIdentifier"] for metadata in metadata_items],
+        identifiers=[entry.id],
         asset_themes={} if asset_themes is None else asset_themes,
     )
-    if kind == "tag_archive" and current is not None:
+    if package.asset is None and current is not None:
         release_notes = _release_notes(current)
 
-    screenshot_url = item.get("display", {}).get("screenshot_url")
-    if not screenshot_url:
-        screenshot_url = _screenshot(github, source_repository)
-    themes = [
-        _theme_record(
-            metadata,
-            source_repository,
-            release=tag,
-            released_at=released_at,
-            asset_name=asset_name,
-            asset_url=asset_url,
-            downloads=downloads,
-            screenshot_url=screenshot_url,
-            release_notes=release_notes,
-            release_history=history.get(metadata["ThemeIdentifier"], ()),
-            display=item.get("display"),
-        )
-        for metadata in metadata_items
-    ]
-    return themes, []
+    theme = _theme_record(
+        metadata,
+        source_repository,
+        release=tag,
+        released_at=released_at,
+        asset_name=asset_name,
+        asset_url=asset_url,
+        downloads=downloads,
+        screenshot_url=entry.screenshot or _screenshot(github, source_repository),
+        release_notes=release_notes,
+        release_history=history.get(entry.id, ()),
+        display=entry,
+    )
+    return [theme], []
 
 
-def index_collections(
-    github: GitHub, path: Path, asset_themes: dict[str, list[str]] | None = None
+def load_galleries(directory: Path) -> list[tuple[Path, tuple[GalleryTheme, ...]]]:
+    """Read every curated gallery, failing loudly on a mistake in one.
+
+    These files are reviewed policy in this repository, so an invalid one is
+    our bug and stops the build rather than quietly dropping its themes.
+    """
+    if not directory.is_dir():
+        return []
+    galleries: list[tuple[Path, tuple[GalleryTheme, ...]]] = []
+    seen: dict[str, Path] = {}
+    for path in sorted(directory.glob("*.toml")):
+        try:
+            themes = parse_gallery(path.read_bytes(), curated=True)
+        except ManifestError as error:
+            raise CatalogAborted(f"{path} {error}") from error
+        for theme in themes:
+            if theme.id in seen:
+                raise CatalogAborted(f"{path} lists {theme.id}, already listed by {seen[theme.id]}")
+            seen[theme.id] = path
+        galleries.append((path, themes))
+    return galleries
+
+
+def index_galleries(
+    github: GitHub, directory: Path, asset_themes: dict[str, list[str]] | None = None
 ) -> tuple[list[Theme], list[dict[str, Any]]]:
-    if not path.exists():
-        return [], []
-    catalog = json.loads(path.read_text())
     themes: list[Theme] = []
     diagnostics: list[dict[str, Any]] = []
-    for collection in catalog.get("collections", []):
-        for item in collection.get("items", []):
-            label = f"{collection['name']}: {item['source_repository']}"
+    for path, entries in load_galleries(directory):
+        for entry in entries:
+            label = f"{path.stem}: {entry.source} ({entry.id})"
             try:
-                found, errors = index_curated_item(github, item, asset_themes)
+                found, errors = index_curated_item(github, entry, asset_themes)
             except (CatalogError, KeyError, urllib.error.HTTPError) as error:
                 found, errors = [], [str(error)]
             themes.extend(found)
@@ -595,9 +603,10 @@ def index_repository(
     if not assets:
         return [], ["latest release has no .nnwtheme.zip asset"]
 
-    screenshot_url = _screenshot(github, repository)
+    tag = latest["tag_name"]
+    hosted, errors = _hosted_gallery(github, full_name, tag)
+    entries = {entry.id: entry for entry in hosted}
     themes: list[Theme] = []
-    errors: list[str] = []
     metadata_by_asset_id: dict[int, list[dict[str, Any]]] = {}
     for asset in assets:
         try:
@@ -631,9 +640,23 @@ def index_repository(
                         _past_release(release, asset["name"], asset["browser_download_url"])
                     )
 
+    listed = {
+        metadata["ThemeIdentifier"]
+        for metadata_items in metadata_by_asset_id.values()
+        for metadata in metadata_items
+    }
+    for identifier in sorted(entries.keys() - listed):
+        errors.append(f"{HOSTED_FILENAME}: {identifier} is not in release {tag}")
+    screenshots, screenshot_errors = _hosted_screenshots(
+        github, full_name, tag, [entries[identifier] for identifier in listed & entries.keys()]
+    )
+    errors.extend(screenshot_errors)
+    repository_screenshot = _screenshot(github, repository) if listed - screenshots.keys() else None
+
     for asset in assets:
         metadata_items = metadata_by_asset_id[asset["id"]]
         for metadata in metadata_items:
+            identifier = metadata["ThemeIdentifier"]
             themes.append(
                 _theme_record(
                     metadata,
@@ -642,17 +665,76 @@ def index_repository(
                     released_at=latest["published_at"],
                     asset_name=asset["name"],
                     asset_url=asset["browser_download_url"],
-                    downloads=downloads_by_theme.get(metadata["ThemeIdentifier"], 0),
-                    screenshot_url=screenshot_url,
+                    downloads=downloads_by_theme.get(identifier, 0),
+                    screenshot_url=screenshots.get(identifier, repository_screenshot),
                     release_notes=_release_notes(latest),
-                    release_history=_newest_first(
-                        history_by_theme.get(metadata["ThemeIdentifier"], [])
-                    ),
+                    release_history=_newest_first(history_by_theme.get(identifier, [])),
+                    display=entries.get(identifier),
                 )
             )
         if not metadata_items:
             errors.append(f"{asset['name']}: no valid .nnwtheme package found")
     return themes, errors
+
+
+def _hosted_gallery(
+    github: GitHub, full_name: str, tag: str
+) -> tuple[tuple[GalleryTheme, ...], list[str]]:
+    """Read a repository's manifest as of its listed release, if it has one.
+
+    A hosted manifest only adds card copy, so any problem with it leaves the
+    repository listed with its defaults and records why.
+    """
+    query = urllib.parse.urlencode({"ref": tag})
+    try:
+        payload = github.json(f"/repos/{full_name}/contents/{HOSTED_FILENAME}?{query}")
+    except CatalogNotFound:
+        return (), []
+    except CatalogError as error:
+        return (), [f"{HOSTED_FILENAME}: {error}"]
+    if not isinstance(payload, dict) or payload.get("type") != "file":
+        return (), [f"{HOSTED_FILENAME}: is not a regular file"]
+    try:
+        return parse_gallery(base64.b64decode(payload["content"]), curated=False), []
+    except (KeyError, TypeError, ValueError) as error:
+        return (), [f"{HOSTED_FILENAME}: {error}"]
+
+
+def _hosted_screenshots(
+    github: GitHub, full_name: str, tag: str, entries: list[GalleryTheme]
+) -> tuple[dict[str, str], list[str]]:
+    """Resolve manifest screenshot paths to images in the release's own tree.
+
+    A path that isn't an image blob at that tag falls back to the repository's
+    usual screenshot rather than linking to something that doesn't exist.
+    """
+    wanted = {entry.id: entry.screenshot for entry in entries if entry.screenshot}
+    if not wanted:
+        return {}, []
+    quoted_tag = urllib.parse.quote(tag, safe="/")
+    try:
+        tree = github.json(f"/repos/{full_name}/git/trees/{quoted_tag}?recursive=1")
+    except CatalogError as error:
+        return {}, [f"{HOSTED_FILENAME}: could not check screenshots: {error}"]
+    sizes = {
+        item.get("path"): item.get("size", 0)
+        for item in tree.get("tree", [])
+        if item.get("type") == "blob"
+    }
+    urls: dict[str, str] = {}
+    errors: list[str] = []
+    for identifier, path in sorted(wanted.items()):
+        size = sizes.get(path)
+        if size is None:
+            errors.append(f"{HOSTED_FILENAME}: screenshot {path} is not in release {tag}")
+        elif not isinstance(size, int) or size > MAX_SCREENSHOT_BYTES:
+            errors.append(f"{HOSTED_FILENAME}: screenshot {path} is larger than 5 MiB")
+        else:
+            urls[identifier] = (
+                f"https://raw.githubusercontent.com/{full_name}/refs/tags/{quoted_tag}/"
+                f"{urllib.parse.quote(path, safe='/')}"
+            )
+    return urls, errors
 
 
 def _asset_identifiers(
@@ -758,7 +840,7 @@ def apply_download_history(
 
 def build_catalog(
     output: Path,
-    collections: Path = Path("catalog/collections.json"),
+    galleries: Path = Path("catalog/galleries"),
     history: Path = Path(".cache/download-history.json"),
     *,
     allow_shrink: bool = False,
@@ -788,7 +870,7 @@ def build_catalog(
         )
         _report(repository["full_name"], found, errors)
 
-    curated_themes, curated_diagnostics = index_collections(github, collections, asset_themes)
+    curated_themes, curated_diagnostics = index_galleries(github, galleries, asset_themes)
     themes.extend(curated_themes)
     diagnostics.extend(curated_diagnostics)
 
@@ -843,7 +925,7 @@ def _report_failures(diagnostics: list[dict[str, Any]]) -> None:
     failed = [entry for entry in diagnostics if entry["errors"]]
     if not failed:
         return
-    print(f"\n{len(failed)} candidate(s) produced no listing:")
+    print(f"\n{len(failed)} candidate(s) reported problems:")
     for entry in failed:
         for error in entry["errors"]:
             print(f"  {entry['repository']}: {error}")
@@ -852,7 +934,7 @@ def _report_failures(diagnostics: list[dict[str, Any]]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build the NetNewsWire theme catalog")
     parser.add_argument("--output", type=Path, default=Path("data/themes.json"))
-    parser.add_argument("--collections", type=Path, default=Path("catalog/collections.json"))
+    parser.add_argument("--galleries", type=Path, default=Path("catalog/galleries"))
     parser.add_argument("--history", type=Path, default=Path(".cache/download-history.json"))
     parser.add_argument(
         "--allow-shrink",
@@ -861,7 +943,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     try:
-        build_catalog(args.output, args.collections, args.history, allow_shrink=args.allow_shrink)
+        build_catalog(args.output, args.galleries, args.history, allow_shrink=args.allow_shrink)
     except CatalogAborted as error:
         raise SystemExit(f"Catalog build aborted: {error}") from error
 

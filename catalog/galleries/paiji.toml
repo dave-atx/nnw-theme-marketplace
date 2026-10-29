@@ -1,0 +1,97 @@
+# PaiJi theme collection: https://paiji.github.io/NetNewsWire-themes-collection/
+#
+# Themes listed by PaiJi's collection. Most source repositories publish no
+# release ZIP, so their entries install the ZIP PaiJi's mirror attaches to its
+# own release. Entries without a package repository install from the source.
+
+# joodaloop/NetNewsWire-themes has no releases; the mirror packages all four.
+[[theme]]
+id = "com.joodaloop.themes.manu"
+source = "joodaloop/NetNewsWire-themes"
+description = "Inspired by Manuel's website, with a dignified serif, subtle shadows, and highlighted links."
+screenshot = "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/manu-light.png"
+
+[theme.package]
+repository = "PaiJi/NetNewsWire-themes-collection"
+tag = "1.0.0"
+asset = "Manu.nnwtheme.zip"
+
+[[theme]]
+id = "com.joodaloop.themes.royal"
+source = "joodaloop/NetNewsWire-themes"
+description = "System serif type, red underlines, and justified text."
+screenshot = "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/royal-light.png"
+
+[theme.package]
+repository = "PaiJi/NetNewsWire-themes-collection"
+tag = "1.0.0"
+asset = "Royal.nnwtheme.zip"
+
+[[theme]]
+id = "com.joodaloop.themes.slab"
+source = "joodaloop/NetNewsWire-themes"
+description = "Monochrome sections, Avenir, and thick outlines."
+screenshot = "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/slab-light.png"
+
+[theme.package]
+repository = "PaiJi/NetNewsWire-themes-collection"
+tag = "1.0.0"
+asset = "Slab.nnwtheme.zip"
+
+[[theme]]
+id = "com.mynameisstuart.themes.system-ui"
+source = "joodaloop/NetNewsWire-themes"
+description = "A modern macOS feel with SF Pro, blue links, and crisp font weights."
+screenshot = "https://github.com/joodaloop/NetNewsWire-themes/raw/main/images/system-ui-lght.png"
+
+[theme.package]
+repository = "PaiJi/NetNewsWire-themes-collection"
+tag = "1.0.0"
+asset = "system-ui.nnwtheme.zip"
+
+# No releases in the source repository.
+[[theme]]
+id = "com.jaysitter.themes.serifgazette"
+source = "jsit/serif-gazette"
+name = "Serif Gazette"
+description = "A newspaper-inspired serif theme for NetNewsWire."
+screenshot = "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/serif-gazette/mac-white.png"
+
+[theme.package]
+repository = "PaiJi/NetNewsWire-themes-collection"
+tag = "1.1.0"
+asset = "serif-gazette.nnwtheme.zip"
+
+# No releases in the source repository.
+[[theme]]
+id = "uk.co.dx13.nnwthemes.allmine"
+source = "mikerhodes/nnw-allmine"
+name = "All Mine"
+description = "A personal take on the default theme with humanist fonts and a favorite code face."
+screenshot = "https://raw.githubusercontent.com/mikerhodes/nnw-allmine/main/images/screenshot.png"
+
+[theme.package]
+repository = "PaiJi/NetNewsWire-themes-collection"
+tag = "1.2.0"
+asset = "nnw-allmine-main.zip"
+
+# Tags a release with no ZIP asset, so this installs the tag archive.
+[[theme]]
+id = "com.lkhrs.themes.minutes"
+source = "lkhrs/nnw-minutes"
+description = "Seravek headings and Iowan Old Style body text, inspired by Simone Silvestroni's site."
+screenshot = "https://paiji.github.io/NetNewsWire-themes-collection/images/themes/minutes/mac-white.png"
+
+[theme.package]
+tag = "1"
+
+# Publishes a valid release ZIP but has no discovery topic.
+[[theme]]
+id = "me.mikeschreiber.nnwthemes.default-serif"
+source = "mischreiber/nnw-themes"
+description = "The default NetNewsWire theme with Apple's New York serif typeface."
+screenshot = "https://raw.githubusercontent.com/mischreiber/nnw-themes/refs/tags/v0.1/images/Default-Serif-light.png"
+
+[theme.package]
+tag = "v0.1"
+asset = "Default-Serif.nnwtheme.zip"
