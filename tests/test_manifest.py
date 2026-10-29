@@ -4,8 +4,9 @@ import unittest
 
 from marketplace.manifest import (
     MAX_DESCRIPTION_CHARS,
+    MAX_FIELD_CHARS,
     MAX_MANIFEST_BYTES,
-    Gallery,
+    MAX_THEMES,
     GalleryTheme,
     ManifestError,
     Package,
@@ -14,10 +15,6 @@ from marketplace.manifest import (
 
 HOSTED = """
 version = 1
-
-[gallery]
-name = "Daisy"
-homepage = "https://example.org/daisy"
 
 [[theme]]
 id = "org.example.daisy"
@@ -34,10 +31,6 @@ name = "Daisy Sans"
 
 CURATED = """
 version = 1
-
-[gallery]
-name = "Example collection"
-homepage = "https://example.org/collection"
 
 [[theme]]
 id = "org.example.reader"
@@ -64,7 +57,7 @@ def hosted(body: str, version: int = 1) -> bytes:
 
 def curated(theme: str, package: str = 'tag = "v1"') -> bytes:
     return (
-        'version = 1\n[gallery]\nname = "G"\nhomepage = "https://example.org"\n'
+        "version = 1\n"
         f'[[theme]]\nid = "org.example.reader"\nsource = "example/reader"\n{theme}\n'
         f"[theme.package]\n{package}\n"
     ).encode()
@@ -72,27 +65,17 @@ def curated(theme: str, package: str = 'tag = "v1"') -> bytes:
 
 class HostedManifestTests(unittest.TestCase):
     def test_reads_card_copy_for_each_theme(self) -> None:
-        gallery = parse_gallery(HOSTED.encode(), curated=False)
         self.assertEqual(
-            gallery,
-            Gallery(
-                name="Daisy",
-                homepage="https://example.org/daisy",
-                themes=(
-                    GalleryTheme(
-                        id="org.example.daisy",
-                        description="Editorial serif theme with a house style.",
-                        screenshot="screenshots/daisy.png",
-                    ),
-                    GalleryTheme(id="org.example.daisy-sans", name="Daisy Sans"),
+            parse_gallery(HOSTED.encode(), curated=False),
+            (
+                GalleryTheme(
+                    id="org.example.daisy",
+                    description="Editorial serif theme with a house style.",
+                    screenshot="screenshots/daisy.png",
                 ),
+                GalleryTheme(id="org.example.daisy-sans", name="Daisy Sans"),
             ),
         )
-
-    def test_gallery_table_is_optional(self) -> None:
-        gallery = parse_gallery(hosted('[[theme]]\nid = "org.example.a"'), curated=False)
-        self.assertIsNone(gallery.name)
-        self.assertEqual([theme.id for theme in gallery.themes], ["org.example.a"])
 
     def test_rejects_source_and_package(self) -> None:
         for extra in ('source = "other/repo"', 'package = { tag = "v1" }'):
@@ -117,7 +100,7 @@ class HostedManifestTests(unittest.TestCase):
 
     def test_accepts_nested_image_paths_in_any_case(self) -> None:
         body = '[[theme]]\nid = "org.example.a"\nscreenshot = "docs/Shots/A.WebP"'
-        [theme] = parse_gallery(hosted(body), curated=False).themes
+        [theme] = parse_gallery(hosted(body), curated=False)
         self.assertEqual(theme.screenshot, "docs/Shots/A.WebP")
 
 
@@ -149,7 +132,7 @@ class ManifestValidationTests(unittest.TestCase):
         for body in (
             'descripton = "x"\n[[theme]]\nid = "org.example.a"',
             '[[theme]]\nid = "org.example.a"\ndescripton = "x"',
-            '[gallery]\nhomepge = "https://example.org"\n[[theme]]\nid = "org.example.a"',
+            '[gallery]\nname = "Daisy"\n[[theme]]\nid = "org.example.a"',
         ):
             with self.subTest(body=body), self.assertRaisesRegex(ManifestError, "unknown key"):
                 parse_gallery(hosted(body), curated=False)
@@ -172,6 +155,26 @@ class ManifestValidationTests(unittest.TestCase):
             with self.subTest(body=body), self.assertRaisesRegex(ManifestError, message):
                 parse_gallery(hosted(body), curated=False)
 
+    def test_caps_the_number_of_themes(self) -> None:
+        body = "".join(f'[[theme]]\nid = "org.example.{n}"\n' for n in range(MAX_THEMES + 1))
+        with self.assertRaisesRegex(ManifestError, f"more than {MAX_THEMES} themes"):
+            parse_gallery(hosted(body), curated=False)
+
+    def test_rejects_control_characters_in_identifiers(self) -> None:
+        with self.assertRaisesRegex(ManifestError, "control character"):
+            parse_gallery(hosted('[[theme]]\nid = "org.example\\u0000a"'), curated=False)
+
+    def test_rejects_overlong_identifiers_and_raw_copy(self) -> None:
+        cases = {
+            f'id = "{"a" * (MAX_FIELD_CHARS + 1)}"': "id is longer than",
+            f'id = "org.example.a"\ndescription = "{" " * (MAX_DESCRIPTION_CHARS * 2 + 1)}"': (
+                "description is longer than"
+            ),
+        }
+        for body, message in cases.items():
+            with self.subTest(message=message), self.assertRaisesRegex(ManifestError, message):
+                parse_gallery(hosted(f"[[theme]]\n{body}"), curated=False)
+
     def test_rejects_duplicate_identifiers(self) -> None:
         body = '[[theme]]\nid = "org.example.a"\n[[theme]]\nid = "org.example.a"'
         with self.assertRaisesRegex(ManifestError, "more than once"):
@@ -190,18 +193,12 @@ class ManifestValidationTests(unittest.TestCase):
             with self.subTest(line=line), self.assertRaisesRegex(ManifestError, message):
                 parse_gallery(hosted(body), curated=False)
 
-    def test_homepage_must_be_https(self) -> None:
-        for url in ("http://example.org", "javascript:alert(1)", "https://user@example.org"):
-            body = f'[gallery]\nhomepage = "{url}"\n[[theme]]\nid = "org.example.a"'
-            with self.subTest(url=url), self.assertRaisesRegex(ManifestError, "https URL"):
-                parse_gallery(hosted(body), curated=False)
-
 
 class CuratedManifestTests(unittest.TestCase):
     def test_reads_sources_and_pinned_packages(self) -> None:
-        gallery = parse_gallery(CURATED.encode(), curated=True)
+        themes = parse_gallery(CURATED.encode(), curated=True)
         self.assertEqual(
-            [(theme.source, theme.package, theme.package_repository) for theme in gallery.themes],
+            [(theme.source, theme.package, theme.package_repository) for theme in themes],
             [
                 (
                     "example/reader",
@@ -213,11 +210,11 @@ class CuratedManifestTests(unittest.TestCase):
                 ("example/archive", Package(tag="v1"), "example/archive"),
             ],
         )
-        self.assertEqual(gallery.themes[0].screenshot, "https://example.org/reader.png")
+        self.assertEqual(themes[0].screenshot, "https://example.org/reader.png")
 
-    def test_requires_gallery_name_and_homepage(self) -> None:
-        raw = CURATED.replace('name = "Example collection"\n', "").encode()
-        with self.assertRaisesRegex(ManifestError, "name and homepage"):
+    def test_package_must_be_a_table(self) -> None:
+        raw = CURATED.replace('[theme.package]\ntag = "v1"', 'package = "v1"').encode()
+        with self.assertRaisesRegex(ManifestError, "package must be a table"):
             parse_gallery(raw, curated=True)
 
     def test_requires_source_and_tag(self) -> None:
@@ -233,6 +230,7 @@ class CuratedManifestTests(unittest.TestCase):
             ("", 'tag = "v1"\nrepository = "example"'): "owner/name",
             ("", 'tag = "v1"\nasset = "../A.zip"'): "file name",
             ("", 'tag = "v1"\nkind = "tag_archive"'): "unknown key kind",
+            ("", 'tag = "v1"\nasset = "A.nnwtheme.zip "'): "no whitespace",
             ('screenshot = "images/a.png"', 'tag = "v1"'): "https URL",
         }
         for (theme, package), message in cases.items():

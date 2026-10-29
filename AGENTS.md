@@ -37,13 +37,15 @@ decides what it may do:
   diagnostic; it must never drop the listing.
 - `catalog/galleries/*.toml` is reviewed policy. Entries also need `source` and
   `[theme.package]`, may use `https://` screenshot URLs, and every `id` must be
-  unique across files. An invalid file aborts the build. Add a comment saying
-  why each gallery or entry is an exception. Prefer getting a theme listed
+  unique across files. An invalid file aborts the build. Start each file with
+  a comment naming the gallery and its homepage, and say why each gallery or
+  entry is an exception. Prefer getting a theme listed
   automatically over adding an entry, and remove an entry once its theme
   qualifies on its own.
 
-Keep the format, the author page, and these rules in sync. A new field needs
-tests for both locations and a decision about whether hosted files may use it.
+Keep the format, the author page, and these rules in sync. Don't add a field
+until something reads it. A new field needs tests for both locations and a
+decision about whether hosted files may use it.
 
 The production site is hosted under a GitHub Pages project path. Generate
 internal links with Hugo `relURL` or `absURL`, never a root-relative `/path`.

@@ -1,12 +1,10 @@
+# PaiJi theme collection: https://paiji.github.io/NetNewsWire-themes-collection/
+#
 # Themes listed by PaiJi's collection. Most source repositories publish no
 # release ZIP, so their entries install the ZIP PaiJi's mirror attaches to its
 # own release. Entries without a package repository install from the source.
 
 version = 1
-
-[gallery]
-name = "PaiJi theme collection"
-homepage = "https://paiji.github.io/NetNewsWire-themes-collection/"
 
 # joodaloop/NetNewsWire-themes has no releases; the mirror packages all four.
 [[theme]]

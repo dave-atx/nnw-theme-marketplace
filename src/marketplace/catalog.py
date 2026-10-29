@@ -23,7 +23,6 @@ from typing import Any
 
 from marketplace.manifest import (
     HOSTED_FILENAME,
-    Gallery,
     GalleryTheme,
     ManifestError,
     parse_gallery,
@@ -546,7 +545,7 @@ def index_curated_item(
     return [theme], []
 
 
-def load_galleries(directory: Path) -> list[tuple[Path, Gallery]]:
+def load_galleries(directory: Path) -> list[tuple[Path, tuple[GalleryTheme, ...]]]:
     """Read every curated gallery, failing loudly on a mistake in one.
 
     These files are reviewed policy in this repository, so an invalid one is
@@ -554,18 +553,18 @@ def load_galleries(directory: Path) -> list[tuple[Path, Gallery]]:
     """
     if not directory.is_dir():
         return []
-    galleries: list[tuple[Path, Gallery]] = []
+    galleries: list[tuple[Path, tuple[GalleryTheme, ...]]] = []
     seen: dict[str, Path] = {}
     for path in sorted(directory.glob("*.toml")):
         try:
-            gallery = parse_gallery(path.read_bytes(), curated=True)
+            themes = parse_gallery(path.read_bytes(), curated=True)
         except ManifestError as error:
             raise CatalogAborted(f"{path} {error}") from error
-        for theme in gallery.themes:
+        for theme in themes:
             if theme.id in seen:
                 raise CatalogAborted(f"{path} lists {theme.id}, already listed by {seen[theme.id]}")
             seen[theme.id] = path
-        galleries.append((path, gallery))
+        galleries.append((path, themes))
     return galleries
 
 
@@ -574,9 +573,9 @@ def index_galleries(
 ) -> tuple[list[Theme], list[dict[str, Any]]]:
     themes: list[Theme] = []
     diagnostics: list[dict[str, Any]] = []
-    for _, gallery in load_galleries(directory):
-        for entry in gallery.themes:
-            label = f"{gallery.name}: {entry.source} ({entry.id})"
+    for path, entries in load_galleries(directory):
+        for entry in entries:
+            label = f"{path.stem}: {entry.source} ({entry.id})"
             try:
                 found, errors = index_curated_item(github, entry, asset_themes)
             except (CatalogError, KeyError, urllib.error.HTTPError) as error:
@@ -605,8 +604,8 @@ def index_repository(
         return [], ["latest release has no .nnwtheme.zip asset"]
 
     tag = latest["tag_name"]
-    gallery, errors = _hosted_gallery(github, full_name, tag)
-    entries = {entry.id: entry for entry in gallery.themes} if gallery else {}
+    hosted, errors = _hosted_gallery(github, full_name, tag)
+    entries = {entry.id: entry for entry in hosted}
     themes: list[Theme] = []
     metadata_by_asset_id: dict[int, list[dict[str, Any]]] = {}
     for asset in assets:
@@ -678,7 +677,9 @@ def index_repository(
     return themes, errors
 
 
-def _hosted_gallery(github: GitHub, full_name: str, tag: str) -> tuple[Gallery | None, list[str]]:
+def _hosted_gallery(
+    github: GitHub, full_name: str, tag: str
+) -> tuple[tuple[GalleryTheme, ...], list[str]]:
     """Read a repository's manifest as of its listed release, if it has one.
 
     A hosted manifest only adds card copy, so any problem with it leaves the
@@ -688,15 +689,15 @@ def _hosted_gallery(github: GitHub, full_name: str, tag: str) -> tuple[Gallery |
     try:
         payload = github.json(f"/repos/{full_name}/contents/{HOSTED_FILENAME}?{query}")
     except CatalogNotFound:
-        return None, []
+        return (), []
     except CatalogError as error:
-        return None, [f"{HOSTED_FILENAME}: {error}"]
+        return (), [f"{HOSTED_FILENAME}: {error}"]
     if not isinstance(payload, dict) or payload.get("type") != "file":
-        return None, [f"{HOSTED_FILENAME}: is not a regular file"]
+        return (), [f"{HOSTED_FILENAME}: is not a regular file"]
     try:
         return parse_gallery(base64.b64decode(payload["content"]), curated=False), []
     except (KeyError, TypeError, ValueError) as error:
-        return None, [f"{HOSTED_FILENAME}: {error}"]
+        return (), [f"{HOSTED_FILENAME}: {error}"]
 
 
 def _hosted_screenshots(

@@ -84,7 +84,6 @@ what a file may do.
 | Themes | Only those the release already ships, matched by `id` | Any theme whose package validates |
 | `source`, `[theme.package]` | Rejected | Required |
 | `screenshot` | Repository-relative image path, checked against the tag's tree and served from `raw.githubusercontent.com/<repo>/refs/tags/<tag>/` | `https://` URL |
-| `[gallery]` | Optional | `name` and `homepage` required |
 | On error | Ignore the file, list with defaults, record a diagnostic | Abort the build |
 
 Both enforce a 16 KiB size limit before parsing, catch parser recursion,

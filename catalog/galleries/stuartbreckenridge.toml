@@ -1,13 +1,11 @@
+# Stuart Breckenridge themes: https://stuartbreckenridge.net/projects/netnewswire-themes/
+#
 # Stuart Breckenridge's themes. Each repository tags releases but attaches no
 # .nnwtheme.zip asset and has no discovery topic, so each entry installs
 # GitHub's archive of a pinned tag. GitHub doesn't count downloads for those.
 # Bump a tag here when Stuart tags a new version.
 
 version = 1
-
-[gallery]
-name = "Stuart Breckenridge themes"
-homepage = "https://stuartbreckenridge.net/projects/netnewswire-themes/"
 
 [[theme]]
 id = "net.stuartbreckenridge.matrix"

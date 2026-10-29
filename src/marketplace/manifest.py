@@ -27,8 +27,7 @@ IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp")
 REPOSITORY_PATTERN = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?/[A-Za-z0-9._-]+")
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x1f\x7f]")
 
-TOP_LEVEL_KEYS = frozenset({"version", "gallery", "theme"})
-GALLERY_KEYS = frozenset({"name", "homepage"})
+TOP_LEVEL_KEYS = frozenset({"version", "theme"})
 HOSTED_THEME_KEYS = frozenset({"id", "name", "description", "screenshot"})
 CURATED_THEME_KEYS = HOSTED_THEME_KEYS | {"source", "package"}
 PACKAGE_KEYS = frozenset({"repository", "tag", "asset"})
@@ -62,14 +61,7 @@ class GalleryTheme:
         return self.package.repository or self.source
 
 
-@dataclass(frozen=True)
-class Gallery:
-    name: str | None
-    homepage: str | None
-    themes: tuple[GalleryTheme, ...]
-
-
-def parse_gallery(raw: bytes, *, curated: bool) -> Gallery:
+def parse_gallery(raw: bytes, *, curated: bool) -> tuple[GalleryTheme, ...]:
     """Parse and validate one manifest.
 
     Hosted manifests arrive from untrusted repositories, so every parser
@@ -91,15 +83,6 @@ def parse_gallery(raw: bytes, *, curated: bool) -> Gallery:
     if type(version) is not int or version != FORMAT_VERSION:
         raise ManifestError(f"version must be {FORMAT_VERSION}")
 
-    gallery = document.get("gallery", {})
-    if not isinstance(gallery, dict):
-        raise ManifestError("[gallery] must be a table")
-    _check_keys(gallery, GALLERY_KEYS, "[gallery]")
-    name = _text(gallery, "name", "[gallery]", MAX_NAME_CHARS)
-    homepage = _https_url(gallery, "homepage", "[gallery]")
-    if curated and (name is None or homepage is None):
-        raise ManifestError("[gallery] needs a name and homepage")
-
     entries = document.get("theme", [])
     if not isinstance(entries, list) or not all(isinstance(entry, dict) for entry in entries):
         raise ManifestError("theme must be an array of [[theme]] tables")
@@ -117,7 +100,7 @@ def parse_gallery(raw: bytes, *, curated: bool) -> Gallery:
         if theme.id in seen:
             raise ManifestError(f"lists {theme.id} more than once")
         seen.add(theme.id)
-    return Gallery(name=name, homepage=homepage, themes=themes)
+    return themes
 
 
 def _theme(entry: dict[str, Any], label: str, *, curated: bool) -> GalleryTheme:
