@@ -13,17 +13,17 @@ What they share by default is the repository's description and screenshot, so th
 
 ```toml
 [[theme]]
-id = "com.example.daisy"
-description = "An editorial serif theme with a cohesive house style."
-screenshot = "screenshots/daisy.png"
+id = "com.example.lantern"
+description = "A warm serif theme with generous margins for long reads."
+screenshot = "screenshots/lantern.png"
 
 [[theme]]
-id = "com.example.daisy-sans"
+id = "com.example.lantern-sans"
 description = """
-  Daisy's layout and colors with a sans-serif font stack,
+  Lantern's layout and colors with a sans-serif font stack,
   for readers who prefer it on screen.
 """
-screenshot = "screenshots/daisy-sans.png"
+screenshot = "screenshots/lantern-sans.png"
 ```
 
 The marketplace reads the file **as of your latest stable release's tag**, not from your default branch. Commit changes to the file, then publish a release, and the cards update on the next catalog refresh. Edits you haven't released yet don't show up.
@@ -35,7 +35,7 @@ The marketplace reads the file **as of your latest stable release's tag**, not f
 | `[[theme]]` `id` | Yes | The theme's `ThemeIdentifier` from its `Info.plist`. |
 | `[[theme]]` `name` | No | The name shown on the card instead of the `Info.plist` `Name`. Up to 80 characters. |
 | `[[theme]]` `description` | No | The card description, instead of the repository description. Up to 300 characters. Line breaks and repeated spaces become single spaces. |
-| `[[theme]]` `screenshot` | No | Path to a PNG, JPEG, or WebP image in the repository, such as `screenshots/daisy.png`. 5 MB at most. |
+| `[[theme]]` `screenshot` | No | Path to a PNG, JPEG, or WebP image in the repository, such as `screenshots/lantern.png`. 5 MB at most. |
 
 Add one `[[theme]]` table for each theme you want to describe. A theme the file doesn't mention keeps the repository's description and screenshot.
 
@@ -44,7 +44,7 @@ Add one `[[theme]]` table for each theme you want to describe. A theme the file 
 - **The file can only describe themes your release ships.** It can't add a theme, point at another repository, or pin an older release. An `id` that isn't in the latest release is ignored.
 - **Screenshots are paths, not URLs.** Write them relative to the repository root, without a leading `/` or `./`. The image must exist at the release's tag. If it doesn't, that card falls back to the repository's usual screenshot.
 - **Mistakes don't remove your listing.** If the file is invalid (bad TOML, an unknown field, a value that's too long), the marketplace ignores the whole file and your themes list as they would without it. Fix the file and publish a new release.
-- **Put the identifier in `id`, not in a table header.** Write `[[theme]]` followed by `id = "com.example.daisy"`. A header like `[themes.com.example.daisy]` is rejected, because TOML reads each dot as another nested table.
+- **Put the identifier in `id`, not in a table header.** Write `[[theme]]` followed by `id = "com.example.lantern"`. A header like `[themes.com.example.lantern]` is rejected, because TOML reads each dot as another nested table.
 - The file must be smaller than 16 KB and describe at most 50 themes.
 
 ## Check your file

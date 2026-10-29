@@ -15,16 +15,16 @@ from marketplace.manifest import (
 
 HOSTED = """
 [[theme]]
-id = "org.example.daisy"
+id = "org.example.lantern"
 description = \"\"\"
   Editorial serif theme
   with a house style.
 \"\"\"
-screenshot = "screenshots/daisy.png"
+screenshot = "screenshots/lantern.png"
 
 [[theme]]
-id = "org.example.daisy-sans"
-name = "Daisy Sans"
+id = "org.example.lantern-sans"
+name = "Lantern Sans"
 """
 
 CURATED = """
@@ -64,11 +64,11 @@ class HostedManifestTests(unittest.TestCase):
             parse_gallery(HOSTED.encode(), curated=False),
             (
                 GalleryTheme(
-                    id="org.example.daisy",
+                    id="org.example.lantern",
                     description="Editorial serif theme with a house style.",
-                    screenshot="screenshots/daisy.png",
+                    screenshot="screenshots/lantern.png",
                 ),
-                GalleryTheme(id="org.example.daisy-sans", name="Daisy Sans"),
+                GalleryTheme(id="org.example.lantern-sans", name="Lantern Sans"),
             ),
         )
 
@@ -125,7 +125,7 @@ class ManifestValidationTests(unittest.TestCase):
         for body in (
             'descripton = "x"\n[[theme]]\nid = "org.example.a"',
             '[[theme]]\nid = "org.example.a"\ndescripton = "x"',
-            '[gallery]\nname = "Daisy"\n[[theme]]\nid = "org.example.a"',
+            '[gallery]\nname = "Lantern"\n[[theme]]\nid = "org.example.a"',
         ):
             with self.subTest(body=body), self.assertRaisesRegex(ManifestError, "unknown key"):
                 parse_gallery(hosted(body), curated=False)

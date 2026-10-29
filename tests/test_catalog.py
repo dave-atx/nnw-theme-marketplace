@@ -563,17 +563,17 @@ def manifest_payload(text: str, kind: str = "file") -> dict[str, Any]:
     return {"type": kind, "content": base64.b64encode(text.encode()).decode()}
 
 
-DAISY_MANIFEST = """
+LANTERN_MANIFEST = """
 [[theme]]
-id = "org.example.daisy"
+id = "org.example.lantern"
 description = "The serif one."
-screenshot = "screenshots/daisy.png"
+screenshot = "screenshots/lantern.png"
 
 [[theme]]
-id = "org.example.daisy-sans"
-name = "Daisy Sans (Beta)"
+id = "org.example.lantern-sans"
+name = "Lantern Sans (Beta)"
 description = "The sans one."
-screenshot = "screenshots/daisy-sans.png"
+screenshot = "screenshots/lantern-sans.png"
 """
 
 
@@ -588,7 +588,7 @@ class ManifestGitHub:
     ) -> None:
         self.manifest = manifest
         self.tree = (
-            {"screenshots/daisy.png": 10, "screenshots/daisy-sans.png": 10}
+            {"screenshots/lantern.png": 10, "screenshots/lantern-sans.png": 10}
             if tree is None
             else tree
         )
@@ -601,8 +601,8 @@ class ManifestGitHub:
             "prerelease": False,
             "body": None,
             "assets": [
-                self.asset(1, "Daisy.nnwtheme.zip"),
-                self.asset(2, "Daisy.Sans.nnwtheme.zip"),
+                self.asset(1, "Lantern.nnwtheme.zip"),
+                self.asset(2, "Lantern.Sans.nnwtheme.zip"),
             ],
         }
 
@@ -612,7 +612,7 @@ class ManifestGitHub:
             "id": asset_id,
             "name": name,
             "state": "uploaded",
-            "browser_download_url": f"https://github.com/example/daisy/{name}",
+            "browser_download_url": f"https://github.com/example/lantern/{name}",
             "download_count": asset_id,
         }
 
@@ -624,56 +624,56 @@ class ManifestGitHub:
             return self.release
         if "/releases?" in path:
             return [self.release]
-        if path == "/repos/example/daisy/contents/nnw-marketplace.toml?ref=v1":
+        if path == "/repos/example/lantern/contents/nnw-marketplace.toml?ref=v1":
             if self.manifest is None:
                 raise CatalogNotFound(path)
             return self.manifest
-        if path == "/repos/example/daisy/git/trees/v1?recursive=1":
+        if path == "/repos/example/lantern/git/trees/v1?recursive=1":
             return {
                 "tree": [{"path": p, "type": "blob", "size": size} for p, size in self.tree.items()]
             }
-        if path == "/repos/example/daisy/git/trees/main?recursive=1":
+        if path == "/repos/example/lantern/git/trees/main?recursive=1":
             return {"tree": [{"path": "docs/screenshot.png", "type": "blob", "size": 10}]}
         raise CatalogNotFound(path)
 
     def bytes(self, url: str) -> bytes:
         if url.endswith("Sans.nnwtheme.zip"):
-            plist = plist_with(ThemeIdentifier="org.example.daisy-sans", Name="Daisy Sans")
-            return theme_archive("Daisy Sans.nnwtheme/", **{"Info.plist": plist})
-        plist = plist_with(ThemeIdentifier="org.example.daisy", Name="Daisy")
-        return theme_archive("Daisy.nnwtheme/", **{"Info.plist": plist})
+            plist = plist_with(ThemeIdentifier="org.example.lantern-sans", Name="Lantern Sans")
+            return theme_archive("Lantern Sans.nnwtheme/", **{"Info.plist": plist})
+        plist = plist_with(ThemeIdentifier="org.example.lantern", Name="Lantern")
+        return theme_archive("Lantern.nnwtheme/", **{"Info.plist": plist})
 
 
-DAISY = REPOSITORY | {
-    "full_name": "example/daisy",
-    "html_url": "https://github.com/example/daisy",
+LANTERN = REPOSITORY | {
+    "full_name": "example/lantern",
+    "html_url": "https://github.com/example/lantern",
     "description": "Two editorial themes.",
 }
-RAW = "https://raw.githubusercontent.com/example/daisy"
+RAW = "https://raw.githubusercontent.com/example/lantern"
 
 
 class HostedGalleryIndexTests(unittest.TestCase):
     def index(self, github: ManifestGitHub) -> tuple[dict[str, Theme], list[str]]:
-        themes, errors = index_repository(github, DAISY, {})
+        themes, errors = index_repository(github, LANTERN, {})
         return {theme.id: theme for theme in themes}, errors
 
     def test_gives_each_theme_its_own_card_copy(self) -> None:
-        github = ManifestGitHub(manifest_payload(DAISY_MANIFEST))
+        github = ManifestGitHub(manifest_payload(LANTERN_MANIFEST))
         themes, errors = self.index(github)
         self.assertEqual(errors, [])
         self.assertEqual(
             [(t.name, t.description, t.screenshot_url) for t in themes.values()],
             [
-                ("Daisy", "The serif one.", f"{RAW}/refs/tags/v1/screenshots/daisy.png"),
+                ("Lantern", "The serif one.", f"{RAW}/refs/tags/v1/screenshots/lantern.png"),
                 (
-                    "Daisy Sans (Beta)",
+                    "Lantern Sans (Beta)",
                     "The sans one.",
-                    f"{RAW}/refs/tags/v1/screenshots/daisy-sans.png",
+                    f"{RAW}/refs/tags/v1/screenshots/lantern-sans.png",
                 ),
             ],
         )
-        self.assertEqual(themes["org.example.daisy-sans"].downloads, 2)
-        self.assertNotIn("/repos/example/daisy/git/trees/main?recursive=1", github.requests)
+        self.assertEqual(themes["org.example.lantern-sans"].downloads, 2)
+        self.assertNotIn("/repos/example/lantern/git/trees/main?recursive=1", github.requests)
 
     def test_without_a_manifest_themes_share_repository_defaults(self) -> None:
         themes, errors = self.index(ManifestGitHub())
@@ -682,26 +682,26 @@ class HostedGalleryIndexTests(unittest.TestCase):
             {(t.name, t.description, t.screenshot_url) for t in themes.values()},
             {
                 (name, "Two editorial themes.", f"{RAW}/main/docs/screenshot.png")
-                for name in ("Daisy", "Daisy Sans")
+                for name in ("Lantern", "Lantern Sans")
             },
         )
 
     def test_unmentioned_theme_keeps_repository_defaults(self) -> None:
-        manifest = '[[theme]]\nid = "org.example.daisy"\ndescription = "Serif."'
+        manifest = '[[theme]]\nid = "org.example.lantern"\ndescription = "Serif."'
         themes, errors = self.index(ManifestGitHub(manifest_payload(manifest)))
         self.assertEqual(errors, [])
-        self.assertEqual(themes["org.example.daisy"].description, "Serif.")
-        self.assertEqual(themes["org.example.daisy-sans"].description, "Two editorial themes.")
+        self.assertEqual(themes["org.example.lantern"].description, "Serif.")
+        self.assertEqual(themes["org.example.lantern-sans"].description, "Two editorial themes.")
         self.assertEqual(
-            themes["org.example.daisy"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
+            themes["org.example.lantern"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
         )
 
     def test_invalid_manifest_falls_back_to_defaults(self) -> None:
         for manifest in (
-            manifest_payload("[[theme]]\nid = 'org.example.daisy'\nsource = 'x/y'"),
+            manifest_payload("[[theme]]\nid = 'org.example.lantern'\nsource = 'x/y'"),
             manifest_payload("not toml ="),
-            manifest_payload(DAISY_MANIFEST, kind="symlink"),
-            [manifest_payload(DAISY_MANIFEST)],
+            manifest_payload(LANTERN_MANIFEST, kind="symlink"),
+            [manifest_payload(LANTERN_MANIFEST)],
             {"type": "file"},
         ):
             with self.subTest(manifest=manifest):
@@ -714,36 +714,36 @@ class HostedGalleryIndexTests(unittest.TestCase):
                 self.assertTrue(error.startswith("nnw-marketplace.toml: "), error)
 
     def test_cannot_add_a_theme_the_release_does_not_ship(self) -> None:
-        manifest = DAISY_MANIFEST + '\n[[theme]]\nid = "org.example.other"\ndescription = "x"\n'
+        manifest = LANTERN_MANIFEST + '\n[[theme]]\nid = "org.example.other"\ndescription = "x"\n'
         themes, errors = self.index(ManifestGitHub(manifest_payload(manifest)))
-        self.assertEqual(sorted(themes), ["org.example.daisy", "org.example.daisy-sans"])
+        self.assertEqual(sorted(themes), ["org.example.lantern", "org.example.lantern-sans"])
         self.assertEqual(errors, ["nnw-marketplace.toml: org.example.other is not in release v1"])
 
     def test_missing_screenshot_falls_back_to_repository_image(self) -> None:
         github = ManifestGitHub(
-            manifest_payload(DAISY_MANIFEST), tree={"screenshots/daisy.png": 10}
+            manifest_payload(LANTERN_MANIFEST), tree={"screenshots/lantern.png": 10}
         )
         themes, errors = self.index(github)
         self.assertEqual(
             errors,
-            ["nnw-marketplace.toml: screenshot screenshots/daisy-sans.png is not in release v1"],
+            ["nnw-marketplace.toml: screenshot screenshots/lantern-sans.png is not in release v1"],
         )
         self.assertEqual(
-            themes["org.example.daisy-sans"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
+            themes["org.example.lantern-sans"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
         )
-        self.assertEqual(themes["org.example.daisy-sans"].description, "The sans one.")
+        self.assertEqual(themes["org.example.lantern-sans"].description, "The sans one.")
 
     def test_unreachable_manifest_falls_back_to_defaults(self) -> None:
-        path = "/repos/example/daisy/contents/nnw-marketplace.toml?ref=v1"
+        path = "/repos/example/lantern/contents/nnw-marketplace.toml?ref=v1"
         github = ManifestGitHub(failures={path: CatalogError("GitHub returned 502")})
         themes, errors = self.index(github)
         self.assertEqual(len(themes), 2)
         self.assertEqual(errors, ["nnw-marketplace.toml: GitHub returned 502"])
 
     def test_unreadable_release_tree_falls_back_to_repository_image(self) -> None:
-        path = "/repos/example/daisy/git/trees/v1?recursive=1"
+        path = "/repos/example/lantern/git/trees/v1?recursive=1"
         github = ManifestGitHub(
-            manifest_payload(DAISY_MANIFEST), failures={path: CatalogError("GitHub returned 502")}
+            manifest_payload(LANTERN_MANIFEST), failures={path: CatalogError("GitHub returned 502")}
         )
         themes, errors = self.index(github)
         self.assertEqual(
@@ -752,21 +752,21 @@ class HostedGalleryIndexTests(unittest.TestCase):
         self.assertEqual(
             {t.screenshot_url for t in themes.values()}, {f"{RAW}/main/docs/screenshot.png"}
         )
-        self.assertEqual(themes["org.example.daisy"].description, "The serif one.")
+        self.assertEqual(themes["org.example.lantern"].description, "The serif one.")
 
     def test_oversized_screenshot_falls_back_to_repository_image(self) -> None:
-        tree = {"screenshots/daisy.png": 10, "screenshots/daisy-sans.png": 5 * 1024 * 1024 + 1}
-        themes, errors = self.index(ManifestGitHub(manifest_payload(DAISY_MANIFEST), tree=tree))
+        tree = {"screenshots/lantern.png": 10, "screenshots/lantern-sans.png": 5 * 1024 * 1024 + 1}
+        themes, errors = self.index(ManifestGitHub(manifest_payload(LANTERN_MANIFEST), tree=tree))
         self.assertEqual(
             errors,
-            ["nnw-marketplace.toml: screenshot screenshots/daisy-sans.png is larger than 5 MiB"],
+            ["nnw-marketplace.toml: screenshot screenshots/lantern-sans.png is larger than 5 MiB"],
         )
         self.assertEqual(
-            themes["org.example.daisy-sans"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
+            themes["org.example.lantern-sans"].screenshot_url, f"{RAW}/main/docs/screenshot.png"
         )
 
     def test_screenshot_path_must_be_a_file(self) -> None:
-        github = ManifestGitHub(manifest_payload(DAISY_MANIFEST))
+        github = ManifestGitHub(manifest_payload(LANTERN_MANIFEST))
         github.tree = {}
         original = github.json
 
@@ -774,8 +774,8 @@ class HostedGalleryIndexTests(unittest.TestCase):
             if path.endswith("/git/trees/v1?recursive=1"):
                 return {
                     "tree": [
-                        {"path": "screenshots/daisy.png", "type": "tree"},
-                        {"path": "screenshots/daisy-sans.png", "type": "blob", "size": 10},
+                        {"path": "screenshots/lantern.png", "type": "tree"},
+                        {"path": "screenshots/lantern-sans.png", "type": "blob", "size": 10},
                     ]
                 }
             return original(path)
@@ -783,7 +783,8 @@ class HostedGalleryIndexTests(unittest.TestCase):
         github.json = json_with_directory  # type: ignore[method-assign]
         themes, errors = self.index(github)
         self.assertEqual(
-            errors, ["nnw-marketplace.toml: screenshot screenshots/daisy.png is not in release v1"]
+            errors,
+            ["nnw-marketplace.toml: screenshot screenshots/lantern.png is not in release v1"],
         )
 
 
