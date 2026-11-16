@@ -39,7 +39,7 @@ a { color: inherit; }
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -133,7 +133,10 @@ h1 em { color: var(--accent); font-weight: 400; }
   color: var(--ink);
   box-shadow: 0 24px 80px var(--shadow);
 }
-.create-dialog::backdrop { background: rgba(0, 0, 0, .6); }
+/* Keeps scroll gestures from reaching the page behind the modal. Safari ignores
+   overscroll-behavior here; showModal() still makes the page inert. */
+.create-dialog:modal { overscroll-behavior: contain; }
+.create-dialog::backdrop { overflow: hidden; overscroll-behavior: contain; background: rgba(0, 0, 0, .6); }
 .create-dialog .eyebrow { margin-bottom: 10px; }
 .create-dialog h2 { margin-bottom: 18px; font: 400 42px/1 var(--serif); }
 .create-dialog p:not(.eyebrow) { color: var(--muted); line-height: 1.6; }

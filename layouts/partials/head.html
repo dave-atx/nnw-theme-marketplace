@@ -1,5 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 {{ $title := cond .IsHome site.Title (printf "%s · %s" .Title site.Title) }}
 {{ $description := .Description | default site.Params.description }}
 <title>{{ $title }}</title>

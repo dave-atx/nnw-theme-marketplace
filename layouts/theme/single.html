@@ -19,7 +19,7 @@
 
       <div class="theme-page-preview">
         {{ with $theme.screenshot_url }}
-          <img src="{{ . }}" alt="{{ $theme.name }} theme shown in NetNewsWire">
+          <img src="{{ . }}" alt="{{ $theme.name }} theme shown in NetNewsWire" fetchpriority="high">
         {{ else }}
           <div class="preview-placeholder" aria-hidden="true">
             <div class="mock-window">

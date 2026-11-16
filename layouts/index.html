@@ -14,7 +14,7 @@
         <a class="hero-create" href="https://github.com/dave-atx/netnewswire-theme-template" data-open-create>Create a theme <span aria-hidden="true">↗</span></a>
       </section>
 
-      <dialog class="create-dialog" aria-labelledby="create-title" data-create-dialog>
+      <dialog class="create-dialog" aria-labelledby="create-title" closedby="any" data-create-dialog>
         <form method="dialog"><button class="create-close" aria-label="Close">×</button></form>
         <p class="eyebrow">Make it yours</p>
         <h2 id="create-title">Create a theme</h2>
@@ -131,6 +131,7 @@
           {{ end }}
         </div>
         <p class="empty-state" data-empty hidden>No themes match that search.</p>
+        <p class="sr-only" role="status" data-catalog-status></p>
       </section>
 
       <section class="how-to" id="install" aria-labelledby="install-heading">
